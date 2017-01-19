@@ -135,6 +135,8 @@ if __name__ == '__main__':
         exit(1)
     reset_manager()
     while True:
+        # sync port
+        sync_port()
         # sleep
         sleep(UPDATE_TIME)
         # update two side information
@@ -148,5 +150,3 @@ if __name__ == '__main__':
             continue
         # post traffic
         post_traffic()
-        # sync port
-        sync_port()
