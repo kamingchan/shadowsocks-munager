@@ -92,6 +92,39 @@ class MuAPI:
         logging.info('upload traffic succeed.')
         return True
 
+    def post_online_user(self, amount):
+        url = self.url + '/nodes/%d/online_count' % (self.node_id,)
+        para = {
+            'count': amount
+        }
+        try:
+            res = requests.post(url, params={'key': self.key}, data=para).json()
+        except requests.exceptions.RequestException:
+            logging.warning('api connection error, check your network or ss-panel.')
+            return False
+        if res['ret'] != 1:
+            logging.error(res['msg'])
+            return False
+        logging.info('upload online users succeed.')
+        return True
+
+    def post_load(self, load, uptime):
+        url = self.url + '/nodes/%d/info' % (self.node_id,)
+        para = {
+            'load': load,
+            'uptime': uptime
+        }
+        try:
+            res = requests.post(url, params={'key': self.key}, data=para).json()
+        except requests.exceptions.RequestException:
+            logging.warning('api connection error, check your network or ss-panel.')
+            return False
+        if res['ret'] != 1:
+            logging.error(res['msg'])
+            return False
+        logging.info('upload load users succeed.')
+        return True
+
 
 class User:
     def __init__(self, **entries):
@@ -103,7 +136,7 @@ class User:
 
 
 def post_traffic():
-    online_user = 0
+    online_users = 0
     for port, traffic in state.items():
         dif = traffic - count[port]
         user_id = users[port].id
@@ -111,12 +144,13 @@ def post_traffic():
             count[port] = traffic
             logging.warning('ss manager may be restarted, reset upload traffic.')
         if dif > 0:
-            online_user += 1
+            online_users += 1
             if api.add_traffic(user_id, dif):
                 count[port] = traffic
                 logging.info('upload user: %d traffic: %d succeed!' % (user_id, dif))
             else:
                 logging.error('upload user: %d traffic: %d fail!' % (user_id, dif))
+    api.post_online_user(online_users)
 
 
 def reset_manager():
@@ -153,6 +187,14 @@ def sync_port():
             # TODO: check password change
 
 
+def upload_load():
+    with open('/proc/loadavg') as f:
+        load = f.read()
+    with open('/proc/uptime') as f:
+        uptime = f.read().split()[0]
+    api.post_load(load, uptime)
+
+
 if __name__ == '__main__':
     api = MuAPI(URL, KEY, ID)
     ss_manager = SSManager(MANAGER_IP, MANAGER_PORT)
@@ -181,3 +223,5 @@ if __name__ == '__main__':
         post_traffic()
         # sync port
         sync_port()
+        # upload load
+        upload_load()
