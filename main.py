@@ -61,7 +61,11 @@ class MuAPI:
 
     @property
     def users(self):
-        res = requests.get(self.url + '/users', params={'key': self.key}).json()
+        try:
+            res = requests.get(self.url + '/users', params={'key': self.key}).json()
+        except requests.exceptions.RequestException:
+            logging.warning('api connection error, check your network or ss-panel.')
+            return None
         if res['ret'] != 1:
             logging.error(res['msg'])
             return None
@@ -77,7 +81,11 @@ class MuAPI:
             'd': traffic,
             'node_id': self.node_id
         }
-        res = requests.post(url, params={'key': self.key}, data=para).json()
+        try:
+            res = requests.post(url, params={'key': self.key}, data=para).json()
+        except requests.exceptions.RequestException:
+            logging.warning('api connection error, check your network or ss-panel.')
+            return False
         if res['ret'] != 1:
             logging.error(res['msg'])
             return False
