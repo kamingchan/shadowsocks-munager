@@ -112,7 +112,7 @@ def post_traffic():
 
 
 def reset_manager():
-    # remove all port
+    logging.info('start to reset manager.')
     for port, traffic in state.items():
         if users[port].available:
             count[port] = traffic
@@ -120,6 +120,7 @@ def reset_manager():
         else:
             ss_manager.remove(port)
             logging.info('reset manager, remove port: %d' % (port,))
+    logging.info('reset manager finish.')
 
 
 def sync_port():
