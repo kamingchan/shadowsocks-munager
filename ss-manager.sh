@@ -73,7 +73,7 @@ do_start() {
         echo "$NAME (pid $PID) is already running..."
         return 0
     fi
-    $DAEMON --manager-address 127.0.0.1:8888 --executable $SS_SERVER -u -m $METHOD -t $TIMEOUT -f $PID_FILE
+    $DAEMON --manager-address 127.0.0.1:8888 --executable $SS_SERVER -s :: -s 0.0.0.0 -u -m $METHOD -t $TIMEOUT -f $PID_FILE --fast-open
     if check_running; then
         echo "Starting $NAME success"
     else
