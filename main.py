@@ -214,6 +214,8 @@ if __name__ == '__main__':
         exit(1)
     reset_manager()
     while True:
+        # upload load
+        upload_load()
         # sleep
         logging.info('thread start sleep.')
         sleep(UPDATE_TIME)
@@ -231,5 +233,3 @@ if __name__ == '__main__':
         post_traffic()
         # sync port
         sync_port()
-        # upload load
-        upload_load()
