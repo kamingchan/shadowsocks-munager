@@ -89,7 +89,6 @@ class MuAPI:
         if res['ret'] != 1:
             logging.error(res['msg'])
             return False
-        logging.info('upload traffic succeed.')
         return True
 
     def post_online_user(self, amount):
@@ -105,7 +104,6 @@ class MuAPI:
         if res['ret'] != 1:
             logging.error(res['msg'])
             return False
-        logging.info('upload online users succeed.')
         return True
 
     def post_load(self, load, uptime):
@@ -122,7 +120,6 @@ class MuAPI:
         if res['ret'] != 1:
             logging.error(res['msg'])
             return False
-        logging.info('upload load users succeed.')
         return True
 
 
