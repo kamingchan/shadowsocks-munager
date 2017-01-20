@@ -150,7 +150,10 @@ def post_traffic():
                 logging.info('upload user: %d traffic: %d succeed!' % (user_id, dif))
             else:
                 logging.error('upload user: %d traffic: %d fail!' % (user_id, dif))
-    api.post_online_user(online_users)
+    if api.post_online_user(online_users):
+        logging.info('upload online users succeed!')
+    else:
+        logging.warning('upload online users fail!')
 
 
 def reset_manager():
@@ -192,7 +195,10 @@ def upload_load():
         load = f.read()
     with open('/proc/uptime') as f:
         uptime = f.read().split()[0]
-    api.post_load(load, uptime)
+    if api.post_load(load, uptime):
+        logging.info('upload load succeed!')
+    else:
+        logging.warning('upload load fail!')
 
 
 if __name__ == '__main__':
