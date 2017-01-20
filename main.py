@@ -120,6 +120,12 @@ def reset_manager():
         else:
             ss_manager.remove(port)
             logging.info('reset manager, remove port: %d' % (port,))
+    # add port
+    for port, user in users.items():
+        if user.available and port not in state:
+            ss_manager.add(port, user.passwd)
+            count[port] = 0
+            logging.info('add port: %d with password: %s' % (port, user.passwd))
     logging.info('reset manager finish.')
 
 
