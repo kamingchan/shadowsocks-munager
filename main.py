@@ -101,14 +101,18 @@ def post_traffic():
 
 def reset_manager():
     # remove all port
-    for port in state:
-        ss_manager.remove(port)
-        logging.info('reset manager, remove port: %d' % (port,))
+    for port, traffic in state.items():
+        if users[port].available:
+            count[port] = traffic
+            logging.info('reset manager, init port: %d with traffic: %d' % (port, traffic))
+        else:
+            ss_manager.remove(port)
+            logging.info('reset manager, remove port: %d' % (port,))
 
 
 def sync_port():
     # remove port
-    for port in state:
+    for port, traffic in state.items():
         if not users[port].available:
             ss_manager.remove(port)
             logging.info('remove port: %d' % (port,))
@@ -135,8 +139,6 @@ if __name__ == '__main__':
         exit(1)
     reset_manager()
     while True:
-        # sync port
-        sync_port()
         # sleep
         sleep(UPDATE_TIME)
         # update two side information
@@ -150,3 +152,5 @@ if __name__ == '__main__':
             continue
         # post traffic
         post_traffic()
+        # sync port
+        sync_port()
