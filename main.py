@@ -215,7 +215,9 @@ if __name__ == '__main__':
     reset_manager()
     while True:
         # sleep
+        logging.info('thread start sleep.')
         sleep(UPDATE_TIME)
+        logging.info('thread wake up.')
         # update two side information
         users = api.users
         if users is None:
