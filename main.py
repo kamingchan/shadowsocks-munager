@@ -20,6 +20,8 @@ class SSManager:
             res = self.cli.recv(1506).decode('utf-8').replace('stat: ', '')
         except socket.timeout:
             return None
+        except ConnectionRefusedError:
+            return None
         # change key from str to int
         res_json = json.loads(res)
         logging.info('get state from ss-manage succeed!')
@@ -31,14 +33,24 @@ class SSManager:
     def add(self, port, password):
         req = 'add: {"server_port":%d, "password":"%s"}' % (port, password)
         req = req.encode('utf-8')
-        self.cli.send(req)
-        return self.cli.recv(1506) == b'ok'
+        try:
+            self.cli.send(req)
+            return self.cli.recv(1506) == b'ok'
+        except socket.timeout:
+            return False
+        except ConnectionRefusedError:
+            return False
 
     def remove(self, port):
         req = 'remove: {"server_port":%d}' % (port,)
         req = req.encode()
-        self.cli.send(req)
-        return self.cli.recv(1506) == b'ok'
+        try:
+            self.cli.send(req)
+            return self.cli.recv(1506) == b'ok'
+        except socket.timeout:
+            return False
+        except ConnectionRefusedError:
+            return False
 
 
 class MuAPI:
