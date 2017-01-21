@@ -58,11 +58,13 @@ class MuAPI:
         self.url = url
         self.key = key
         self.node_id = node_id
+        self.session = requests.session()
+        self.session.params = {'key': self.key}
 
     @property
     def users(self):
         try:
-            res = requests.get(self.url + '/users', params={'key': self.key}).json()
+            res = self.session.get(self.url + '/users', timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
             return None
@@ -76,13 +78,13 @@ class MuAPI:
 
     def add_traffic(self, user_id, traffic):
         url = self.url + '/users/%d/traffic' % (user_id,)
-        para = {
+        data = {
             'u': 0,
             'd': traffic,
             'node_id': self.node_id
         }
         try:
-            res = requests.post(url, params={'key': self.key}, data=para).json()
+            res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
             return False
@@ -93,11 +95,11 @@ class MuAPI:
 
     def post_online_user(self, amount):
         url = self.url + '/nodes/%d/online_count' % (self.node_id,)
-        para = {
+        data = {
             'count': amount
         }
         try:
-            res = requests.post(url, params={'key': self.key}, data=para).json()
+            res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
             return False
@@ -108,12 +110,12 @@ class MuAPI:
 
     def post_load(self, load, uptime):
         url = self.url + '/nodes/%d/info' % (self.node_id,)
-        para = {
+        data = {
             'load': load,
             'uptime': uptime
         }
         try:
-            res = requests.post(url, params={'key': self.key}, data=para).json()
+            res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
             return False
