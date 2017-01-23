@@ -3,7 +3,6 @@ import socket
 from time import sleep
 
 import requests
-
 from config import *
 
 
@@ -158,12 +157,12 @@ def post_traffic():
 def reset_manager():
     logging.info('start to reset manager.')
     for port, traffic in state.items():
-        if users[port].available:
-            count[port] = traffic
-            logging.info('reset manager, init port: %d with traffic: %d' % (port, traffic))
-        else:
+        if port not in users or not users[port].available:
             ss_manager.remove(port)
             logging.info('reset manager, remove port: %d' % (port,))
+        else:
+            count[port] = traffic
+            logging.info('reset manager, init port: %d with traffic: %d' % (port, traffic))
     # add port
     for port, user in users.items():
         if user.available and port not in state:
@@ -176,7 +175,7 @@ def reset_manager():
 def sync_port():
     # remove port
     for port, traffic in state.items():
-        if not users[port].available:
+        if port not in users or not users[port].available:
             ss_manager.remove(port)
             logging.info('remove port: %d' % (port,))
     # add port
