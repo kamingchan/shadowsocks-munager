@@ -67,6 +67,9 @@ class MuAPI:
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
             return None
+        except ValueError:
+            logging.warning('load json error, check your ss-panel.')
+            return None
         if res['ret'] != 1:
             logging.error(res['msg'])
             return None
@@ -87,6 +90,9 @@ class MuAPI:
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
             return False
+        except ValueError:
+            logging.warning('load json error, check your ss-panel.')
+            return False
         if res['ret'] != 1:
             logging.error(res['msg'])
             return False
@@ -101,6 +107,9 @@ class MuAPI:
             res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
+            return False
+        except ValueError:
+            logging.warning('load json error, check your ss-panel.')
             return False
         if res['ret'] != 1:
             logging.error(res['msg'])
@@ -117,6 +126,9 @@ class MuAPI:
             res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException:
             logging.warning('api connection error, check your network or ss-panel.')
+            return False
+        except ValueError:
+            logging.warning('load json error, check your ss-panel.')
             return False
         if res['ret'] != 1:
             logging.error(res['msg'])
