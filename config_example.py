@@ -1,5 +1,3 @@
-import logging
-
 URL = 'https://www.example.com/mu'
 KEY = 'your_key'
 UPDATE_TIME = 120
@@ -11,4 +9,12 @@ MANAGER_PORT = 8888
 SOCKET_TIMEOUT = 10
 HTTP_TIMEOUT = 10
 
-logging.basicConfig(level=logging.INFO)
+import logging
+
+logging.basicConfig(
+    format='TIME %(asctime)s LINE %(lineno)-4d  %(levelname)-8s %(message)s',
+    datefmt='%m-%d %H:%M',
+    level=logging.INFO,
+    filename='munager.log',
+    filemode='w'
+)
