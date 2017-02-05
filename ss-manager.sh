@@ -22,6 +22,7 @@ PID_DIR=/var/run
 PID_FILE=$PID_DIR/ss-manager.pid
 RET_VAL=0
 SS_SERVER=/usr/local/bin/ss-server
+ACL_FILE=/root/shadowsocks-munager/ss.acl
 
 METHOD=rc4-md5
 TIMEOUT=360
@@ -73,7 +74,16 @@ do_start() {
         echo "$NAME (pid $PID) is already running..."
         return 0
     fi
-    $DAEMON --manager-address 127.0.0.1:8888 --executable $SS_SERVER -s :: -s 0.0.0.0 -u -m $METHOD -t $TIMEOUT -f $PID_FILE --fast-open
+    $DAEMON \
+    --manager-address 127.0.0.1:8888 \
+    --executable $SS_SERVER \
+    -s :: -s 0.0.0.0 \
+    -u \
+    -m $METHOD \
+    -t $TIMEOUT \
+    -f $PID_FILE \
+    --fast-open \
+    --acl $ACL_FILE
     if check_running; then
         echo "Starting $NAME success"
     else
