@@ -9,3 +9,8 @@
 3. 复制 `config_example.py` 为 `config.py`，修改对应参数。
 4. `python3 main.py` 运行脚本，在生产环境应该使用 supervisor 进行守护，可以参考 `supervisor.conf` 文件。
 5. 建议使用 hosts 文件屏蔽百度高精度定位 API。
+
+## 已知 Bug
+
+1. 不支持自定义加密。
+2. 不支持修改密码。
