@@ -26,6 +26,8 @@ ACL_FILE=/root/shadowsocks-munager/ss.acl
 
 METHOD=rc4-md5
 TIMEOUT=360
+PLUGIN=obfs-server
+PLUGIN_OPTS="obfs=http"
 
 [ -x $DAEMON ] || exit 0
 
@@ -83,7 +85,9 @@ do_start() {
     -t $TIMEOUT \
     -f $PID_FILE \
     --fast-open \
-    --acl $ACL_FILE
+    --acl $ACL_FILE \
+    --plugin $PLUGIN \
+    --plugin-opts $PLUGIN_OPTS
     if check_running; then
         echo "Starting $NAME success"
     else
