@@ -21,12 +21,12 @@ NAME=Shadowsocks-Manager
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/ss-manager.pid
 RET_VAL=0
+
 SS_SERVER=/usr/local/bin/ss-server
 ACL_FILE=/root/shadowsocks-munager/ss.acl
-
 METHOD=rc4-md5
 TIMEOUT=360
-PLUGIN=obfs-server
+PLUGIN=/usr/local/bin/obfs-server
 PLUGIN_OPTS="obfs=http"
 
 [ -x $DAEMON ] || exit 0
