@@ -85,9 +85,9 @@ do_start() {
     -t $TIMEOUT \
     -f $PID_FILE \
     --fast-open \
-    --acl $ACL_FILE #\
-    # --plugin $PLUGIN \
-    # --plugin-opts $PLUGIN_OPTS
+    --acl $ACL_FILE \
+    --plugin $PLUGIN \
+    --plugin-opts $PLUGIN_OPTS
     if check_running; then
         echo "Starting $NAME success"
     else
