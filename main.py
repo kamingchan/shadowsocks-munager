@@ -42,7 +42,7 @@ class SSManager:
 
     def remove(self, port):
         req = 'remove: {"server_port":%d}' % (port,)
-        req = req.encode()
+        req = req.encode('utf-8')
         try:
             self.cli.send(req)
             return self.cli.recv(1506) == b'ok'
