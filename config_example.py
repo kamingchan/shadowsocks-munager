@@ -14,7 +14,5 @@ import logging
 logging.basicConfig(
     format='TIME %(asctime)s LINE %(lineno)-4d  %(levelname)-8s %(message)s',
     datefmt='%m-%d %H:%M',
-    level=logging.INFO,
-    filename='munager.log',
-    filemode='w'
+    level=logging.INFO
 )
