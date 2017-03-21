@@ -1,8 +1,10 @@
 import json
 import socket
+from signal import signal, SIGINT
 from time import sleep
 
 import requests
+
 from config import *
 
 
@@ -211,6 +213,13 @@ def upload_load():
         logging.warning('upload load fail!')
 
 
+def int_signal_handler(signal, _):
+    logging.info('receive signal {}, upload traffic'.format(signal))
+    upload_load()
+    logging.info('exting...')
+    exit(0)
+
+
 if __name__ == '__main__':
     api = MuAPI(URL, KEY, ID)
     ss_manager = SSManager(MANAGER_IP, MANAGER_PORT)
@@ -223,6 +232,7 @@ if __name__ == '__main__':
         logging.error('start fail, please check network!')
         exit(1)
     reset_manager()
+    signal(SIGINT, int_signal_handler)
     while True:
         # upload load
         upload_load()
