@@ -8,6 +8,9 @@ MANAGER_PORT = 8888
 
 SOCKET_TIMEOUT = 10
 HTTP_TIMEOUT = 10
+FAST_OPEN = True
+PLUGIN = 'obfs-server'
+PLUGIN_OPTS = 'obfs=http'
 
 import logging
 

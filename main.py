@@ -31,8 +31,18 @@ class SSManager:
             ret[int(k)] = v
         return ret
 
-    def add(self, port, password):
-        req = 'add: {"server_port":%d, "password":"%s"}' % (port, password)
+    def add(self, port, password, method):
+        msg = dict(
+            server_port=port,
+            password=password,
+            method=method,
+            plugin=PLUGIN,
+            plugin_opts=PLUGIN_OPTS,
+            fast_open=FAST_OPEN,
+            mode=MODE
+        )
+        req = 'add: {msg}'.format(msg=json.dumps(msg))
+        # to bytes
         req = req.encode('utf-8')
         try:
             self.cli.send(req)
@@ -180,7 +190,7 @@ def reset_manager():
     # add port
     for port, user in users.items():
         if user.available and port not in state:
-            ss_manager.add(port, user.passwd)
+            ss_manager.add(port, user.passwd, user.method)
             count[port] = 0
             logging.info('add port: %d with password: %s' % (port, user.passwd))
     logging.info('reset manager finish.')
@@ -195,7 +205,7 @@ def sync_port():
     # add port
     for port, user in users.items():
         if user.available and port not in state:
-            ss_manager.add(port, user.passwd)
+            ss_manager.add(port, user.passwd, user.method)
             # reset traffic
             count[port] = 0
             logging.info('add port: %d with password: %s' % (port, user.passwd))
