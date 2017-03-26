@@ -215,7 +215,7 @@ def upload_load():
 
 def int_signal_handler(signal, _):
     logging.info('receive signal {}, upload traffic'.format(signal))
-    upload_load()
+    post_traffic()
     logging.info('exting...')
     exit(0)
 
