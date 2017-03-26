@@ -19,9 +19,11 @@ class SSManager:
         self.cli.send(b'ping')
         try:
             res = self.cli.recv(1506).decode('utf-8').replace('stat: ', '')
-        except socket.timeout:
+        except socket.timeout as e:
+            logging.exception(e)
             return None
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as e:
+            logging.exception(e)
             return None
         # change key from str to int
         res_json = json.loads(res)
@@ -47,9 +49,11 @@ class SSManager:
         try:
             self.cli.send(req)
             return self.cli.recv(1506) == b'ok'
-        except socket.timeout:
+        except socket.timeout as e:
+            logging.exception(e)
             return False
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as e:
+            logging.exception(e)
             return False
 
     def remove(self, port):
@@ -58,9 +62,11 @@ class SSManager:
         try:
             self.cli.send(req)
             return self.cli.recv(1506) == b'ok'
-        except socket.timeout:
+        except socket.timeout as e:
+            logging.exception(e)
             return False
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as e:
+            logging.exception(e)
             return False
 
 
@@ -76,10 +82,12 @@ class MuAPI:
     def users(self):
         try:
             res = self.session.get(self.url + '/users', timeout=HTTP_TIMEOUT).json()
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            logging.exception(e)
             logging.warning('api connection error, check your network or ss-panel.')
             return None
-        except ValueError:
+        except ValueError as e:
+            logging.exception(e)
             logging.warning('load json error, check your ss-panel.')
             return None
         if res['ret'] != 1:
@@ -99,10 +107,12 @@ class MuAPI:
         }
         try:
             res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            logging.exception(e)
             logging.warning('api connection error, check your network or ss-panel.')
             return False
-        except ValueError:
+        except ValueError as e:
+            logging.exception(e)
             logging.warning('load json error, check your ss-panel.')
             return False
         if res['ret'] != 1:
@@ -117,10 +127,12 @@ class MuAPI:
         }
         try:
             res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            logging.exception(e)
             logging.warning('api connection error, check your network or ss-panel.')
             return False
-        except ValueError:
+        except ValueError as e:
+            logging.exception(e)
             logging.warning('load json error, check your ss-panel.')
             return False
         if res['ret'] != 1:
@@ -136,10 +148,12 @@ class MuAPI:
         }
         try:
             res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as e:
+            logging.exception(e)
             logging.warning('api connection error, check your network or ss-panel.')
             return False
-        except ValueError:
+        except ValueError as e:
+            logging.exception(e)
             logging.warning('load json error, check your ss-panel.')
             return False
         if res['ret'] != 1:
