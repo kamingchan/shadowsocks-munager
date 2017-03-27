@@ -16,8 +16,8 @@ class SSManager:
 
     @property
     def state(self):
-        self.cli.send(b'ping')
         try:
+            self.cli.send(b'ping')
             res = self.cli.recv(1506).decode('utf-8').replace('stat: ', '')
         except socket.timeout as e:
             logging.exception(e)
