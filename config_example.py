@@ -11,6 +11,7 @@ HTTP_TIMEOUT = 10
 FAST_OPEN = True
 PLUGIN = 'obfs-server'
 PLUGIN_OPTS = 'obfs=http'
+MODE = 'tcp_and_udp'
 
 import logging
 
