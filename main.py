@@ -174,15 +174,15 @@ class User:
 def post_traffic():
     online_users = 0
     for port, traffic in state.items():
-        dif = traffic - count[port]
+        dif = traffic - throughput_count[port]
         user_id = users[port].id
         if dif < 0:
-            count[port] = traffic
+            throughput_count[port] = traffic
             logging.warning('ss manager may be restarted, reset upload traffic.')
         if dif > 0:
             online_users += 1
             if api.add_traffic(user_id, dif):
-                count[port] = traffic
+                throughput_count[port] = traffic
                 logging.info('upload user: %d traffic: %d succeed!' % (user_id, dif))
             else:
                 logging.error('upload user: %d traffic: %d fail!' % (user_id, dif))
@@ -199,14 +199,14 @@ def reset_manager():
             ss_manager.remove(port)
             logging.info('reset manager, remove port: %d' % (port,))
         else:
-            count[port] = traffic
+            throughput_count[port] = traffic
             logging.info('reset manager, init port: %d with traffic: %d' % (port, traffic))
     # add port
     for port, user in users.items():
         if user.available and port not in state:
             ss_manager.add(port, user.passwd, user.method)
-            count[port] = 0
             logging.info('add port: %d with password: %s' % (port, user.passwd))
+            throughput_count[port] = 0
     logging.info('reset manager finish.')
 
 
@@ -221,7 +221,7 @@ def sync_port():
         if user.available and port not in state:
             ss_manager.add(port, user.passwd, user.method)
             # reset traffic
-            count[port] = 0
+            throughput_count[port] = 0
             logging.info('add port: %d with password: %s' % (port, user.passwd))
             # TODO: check password change
 
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     api = MuAPI(URL, KEY, ID)
     ss_manager = SSManager(MANAGER_IP, MANAGER_PORT)
 
-    count = dict()
+    throughput_count = dict()
 
     users = api.users
     state = ss_manager.state
