@@ -30,6 +30,7 @@ class SSManager:
         logging.info('get state from ss-manage succeed!')
         ret = dict()
         for k, v in res_json.items():
+            # port: throughput
             ret[int(k)] = v
         return ret
 
@@ -79,7 +80,10 @@ class MuAPI:
         self.session.params = {'key': self.key}
 
     @property
-    def users(self):
+    def users(self) -> dict or None:
+        """
+        port: User object
+        """
         try:
             res = self.session.get(self.url + '/users', timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException as e:
@@ -165,6 +169,9 @@ class MuAPI:
 class User:
     def __init__(self, **entries):
         self.__dict__.update(entries)
+        # from Mu api
+        # passwd: ss password
+        # method: ss method
 
     @property
     def available(self):
@@ -205,8 +212,11 @@ def reset_manager():
     for port, user in users.items():
         if user.available and port not in state:
             ss_manager.add(port, user.passwd, user.method)
-            logging.info('add port: %d with password: %s' % (port, user.passwd))
             throughput_count[port] = 0
+            logging.info('add port: %d, password: %s, method: %s' % (port, user.passwd, user.method))
+        # add password and method
+        user_password[port] = user.passwd
+        user_method[port] = user.method
     logging.info('reset manager finish.')
 
 
@@ -222,8 +232,18 @@ def sync_port():
             ss_manager.add(port, user.passwd, user.method)
             # reset traffic
             throughput_count[port] = 0
-            logging.info('add port: %d with password: %s' % (port, user.passwd))
-            # TODO: check password change
+            user_password[port] = user.passwd
+            user_method[port] = user.method
+            logging.info('add port: %d, password: %s, method: %s' % (port, user.passwd, user.method))
+        if user.available and port in state:
+            # check password and method change
+            if user.passwd != user_password[port] or user.method != user_method[port]:
+                logging.info('port: %d change password or method, reset.' % (port,))
+                ss_manager.remove(port)
+                ss_manager.add(port, user.passwd, user.method)
+                throughput_count[port] = 0
+                user_password[port] = user.passwd
+                user_method[port] = user.method
 
 
 def upload_load():
@@ -249,6 +269,8 @@ if __name__ == '__main__':
     ss_manager = SSManager(MANAGER_IP, MANAGER_PORT)
 
     throughput_count = dict()
+    user_password = dict()
+    user_method = dict()
 
     users = api.users
     state = ss_manager.state
