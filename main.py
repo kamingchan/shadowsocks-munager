@@ -39,11 +39,14 @@ class SSManager:
             server_port=port,
             password=password,
             method=method,
-            plugin=PLUGIN,
-            plugin_opts=PLUGIN_OPTS,
             fast_open=FAST_OPEN,
             mode=MODE
         )
+        if PLUGIN:
+            msg.update(
+                plugin=PLUGIN,
+                plugin_opts=PLUGIN_OPTS
+            )
         req = 'add: {msg}'.format(msg=json.dumps(msg))
         # to bytes
         req = req.encode('utf-8')
