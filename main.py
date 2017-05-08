@@ -3,6 +3,7 @@ import socket
 from signal import signal, SIGINT
 from time import sleep
 
+import psutil
 import requests
 
 from config import *
@@ -247,10 +248,12 @@ def sync_port():
 
 
 def upload_load():
-    with open('/proc/loadavg') as f:
-        load = f.read()
-    with open('/proc/uptime') as f:
-        uptime = f.read().split()[0]
+    uptime = psutil.boot_time()
+    load = 'Virtual Mem: {vir}%, Swap Mem: {swp}%, CPU Pre: {cpu}%'.format(
+        vir=psutil.virtual_memory().percent,
+        swp=psutil.swap_memory().percent,
+        cpu=psutil.cpu_percent(),
+    )
     if api.post_load(load, uptime):
         logging.info('upload load succeed!')
     else:
