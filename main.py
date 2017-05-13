@@ -1,7 +1,7 @@
 import json
 import socket
 from signal import signal, SIGINT
-from time import sleep
+from time import sleep, time
 
 import psutil
 import requests
@@ -251,7 +251,7 @@ def sync_port():
 
 
 def upload_load():
-    uptime = psutil.boot_time()
+    uptime = time() - psutil.boot_time()
     load = 'Virtual Mem: {vir}%, Swap Mem: {swp}%, CPU Pre: {cpu}%'.format(
         vir=psutil.virtual_memory().percent,
         swp=psutil.swap_memory().percent,
