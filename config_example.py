@@ -10,7 +10,7 @@ SOCKET_TIMEOUT = 10
 HTTP_TIMEOUT = 10
 FAST_OPEN = True
 PLUGIN = 'obfs-server'
-PLUGIN_OPTS = 'obfs=http'
+PLUGIN_OPTS = 'obfs=http;fast-open'
 MODE = 'tcp_and_udp'
 
 import logging

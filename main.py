@@ -1,7 +1,6 @@
 import json
 import socket
-from signal import signal, SIGINT
-from time import sleep
+from time import sleep, time
 
 import psutil
 import requests
@@ -40,11 +39,14 @@ class SSManager:
             server_port=port,
             password=password,
             method=method,
-            plugin=PLUGIN,
-            plugin_opts=PLUGIN_OPTS,
             fast_open=FAST_OPEN,
             mode=MODE
         )
+        if PLUGIN:
+            msg.update(
+                plugin=PLUGIN,
+                plugin_opts=PLUGIN_OPTS
+            )
         req = 'add: {msg}'.format(msg=json.dumps(msg))
         # to bytes
         req = req.encode('utf-8')
@@ -248,7 +250,7 @@ def sync_port():
 
 
 def upload_load():
-    uptime = psutil.boot_time()
+    uptime = time() - psutil.boot_time()
     # calculate diff network traffic using `sleep()`
     # using `tornado` maybe better
     WAIT_TIME = 1  # in second
@@ -273,13 +275,6 @@ def upload_load():
         logging.warning('upload load fail!')
 
 
-def int_signal_handler(signal, _):
-    logging.info('receive signal {}, upload traffic'.format(signal))
-    post_traffic()
-    logging.info('exting...')
-    exit(0)
-
-
 if __name__ == '__main__':
     api = MuAPI(URL, KEY, ID)
     ss_manager = SSManager(MANAGER_IP, MANAGER_PORT)
@@ -294,7 +289,6 @@ if __name__ == '__main__':
         logging.error('start fail, please check network!')
         exit(1)
     reset_manager()
-    signal(SIGINT, int_signal_handler)
     while True:
         # upload load
         upload_load()
