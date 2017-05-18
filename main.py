@@ -249,10 +249,23 @@ def sync_port():
 
 def upload_load():
     uptime = psutil.boot_time()
-    load = 'Virtual Mem: {vir}%, Swap Mem: {swp}%, CPU Pre: {cpu}%'.format(
+    # calculate diff network traffic using `sleep()`
+    # using `tornado` maybe better
+    WAIT_TIME = 1  # in second
+    sent = psutil.net_io_counters().bytes_sent
+    recv = psutil.net_io_counters().bytes_recv
+    sleep(WAIT_TIME)
+    current_sent = psutil.net_io_counters().bytes_sent
+    current_recv = psutil.net_io_counters().bytes_recv
+    # change in to killo bytes
+    sent_speed = (current_sent - sent) / WAIT_TIME * 8 / 1024
+    recv_speed = (current_recv - recv) / WAIT_TIME * 8 / 1024
+    load = 'Virtual Mem: {vir}%, Swap Mem: {swp}%, CPU Pre: {cpu}%, Download: {download}kB/s, Upload: {upload}kB/s'.format(
         vir=psutil.virtual_memory().percent,
         swp=psutil.swap_memory().percent,
         cpu=psutil.cpu_percent(),
+        download=round(recv_speed, 2),
+        upload=round(sent_speed, 2),
     )
     if api.post_load(load, uptime):
         logging.info('upload load succeed!')
