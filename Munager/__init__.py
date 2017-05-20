@@ -61,7 +61,8 @@ class Munager:
         # cpu, vir, swp, upload, download, sent_speed, recv_speed = self.sys_status
         data = yield self.sys_status
         result = yield self.mu_api.post_load(data)
-        self.logger.info('post system load return {}.'.format(result))
+        if result:
+            self.logger.info('post system load finished.')
 
     @gen.coroutine
     def update_ss_manager(self):
