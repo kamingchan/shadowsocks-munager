@@ -30,7 +30,7 @@ class SSManager:
         for port, throughput in res_json.items():
             # check user information in redis
             if self._get_key(['user', port]) in redis_keys:
-                self.redis.set(self._get_key(['throughput', port]), throughput)
+                self.redis.hset(self._get_key(['user', port]), 'cursor', throughput)
             else:
                 # wait for next check and add information from MuAPI
                 self.remove(port)
@@ -59,11 +59,12 @@ class SSManager:
         for port, throughput in res_json.items():
             info = self.redis.hgetall(self._get_key(['user', str(port)]))
             info = self._to_unicode(info)
-            info['cursor'] = throughput
+            info['cursor'] = int(info.get('cursor', 0))
+            info['throughput'] = throughput
             ret[int(port)] = info
         return ret
 
-    def add(self, port, password, method):
+    def add(self, user_id, port, password, method):
         msg = dict(
             server_port=port,
             password=password,
@@ -78,7 +79,8 @@ class SSManager:
         req = req.encode('utf-8')
         self.cli.send(req)
         pipeline = self.redis.pipeline()
-        pipeline.set(self._get_key(['throughput', str(port)]), 0)
+        pipeline.hset(self._get_key(['user', str(port)]), 'cursor', 0)
+        pipeline.hset(self._get_key(['user', str(port)]), 'user_id', user_id)
         pipeline.hset(self._get_key(['user', str(port)]), 'password', password)
         pipeline.hset(self._get_key(['user', str(port)]), 'method', method)
         pipeline.execute()
