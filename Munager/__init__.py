@@ -101,16 +101,10 @@ class Munager:
         # check finish
         self.logger.info('check ports finished.')
 
-        # update online users count
-        state_list = [x for _, x in state.items()]
-        online_amount = len(list(filter(lambda x: x.get('throughput') > x.get('cursor'), state_list)))
-        result = yield self.mu_api.post_online_user(online_amount)
-        if result:
-            self.logger.info('upload online user count: {}.'.format(online_amount))
-
     @gen.coroutine
     def upload_throughput(self):
         state = self.ss_manager.state
+        online_amount = 0
         for port, info in state.items():
             cursor = info.get('cursor')
             throughput = info.get('throughput')
@@ -118,12 +112,18 @@ class Munager:
                 self.logger.warning('error throughput, try fix.')
                 self.ss_manager.set_cursor(port, throughput)
             elif throughput > cursor:
+                online_amount += 1
                 dif = throughput - cursor
                 user_id = info.get('user_id')
                 result = yield self.mu_api.upload_throughput(user_id, dif)
                 if result:
                     self.ss_manager.set_cursor(port, throughput)
                     self.logger.info('update traffic: {} for port: {}.'.format(dif, port))
+
+        # update online users count
+        result = yield self.mu_api.post_online_user()
+        if result:
+            self.logger.info('upload online user count: {}.'.format(online_amount))
 
     def run(self):
         # period task
