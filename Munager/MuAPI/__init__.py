@@ -77,7 +77,7 @@ class MuAPI:
     def get_users(self, key) -> dict:
         request = self._get_request('/mu/users')
         response = yield self.client.fetch(request)
-        content = response.body
+        content = response.body.decode('utf-8')
         cont_json = json.loads(content)
         if cont_json.get('ret') != 1:
             raise MuAPIError(cont_json)
