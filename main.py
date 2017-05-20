@@ -147,14 +147,11 @@ class MuAPI:
             return False
         return True
 
-    def post_load(self, load, uptime):
+    def post_load(self, **kwargs):
         url = self.url + '/nodes/%d/info' % (self.node_id,)
-        data = {
-            'load': load,
-            'uptime': uptime
-        }
+        logging.debug('post load api get kwargs: {}.'.format(kwargs))
         try:
-            res = self.session.post(url, data=data, timeout=HTTP_TIMEOUT).json()
+            res = self.session.post(url, data=kwargs, timeout=HTTP_TIMEOUT).json()
         except requests.exceptions.RequestException as e:
             logging.exception(e)
             logging.warning('api connection error, check your network or ss-panel.')
@@ -262,14 +259,21 @@ def upload_load():
     # change in to killo bytes
     sent_speed = (current_sent - sent) / WAIT_TIME * 8 / 1024
     recv_speed = (current_recv - recv) / WAIT_TIME * 8 / 1024
-    load = 'Virtual Mem: {vir}%, Swap Mem: {swp}%, CPU Pre: {cpu}%, Download: {download}kB/s, Upload: {upload}kB/s'.format(
-        vir=psutil.virtual_memory().percent,
-        swp=psutil.swap_memory().percent,
-        cpu=psutil.cpu_percent(),
-        download=round(recv_speed, 2),
-        upload=round(sent_speed, 2),
-    )
-    if api.post_load(load, uptime):
+
+    cpu = psutil.cpu_percent()
+    vir = psutil.virtual_memory().percent
+    swp = psutil.swap_memory().percent
+    upload = round(sent_speed, 2)
+    download = round(recv_speed, 2)
+
+    if api.post_load(
+            cpu=cpu,
+            vir=vir,
+            swp=swp,
+            upload=upload,
+            download=download,
+            uptime=uptime,
+    ):
         logging.info('upload load succeed!')
     else:
         logging.warning('upload load fail!')
