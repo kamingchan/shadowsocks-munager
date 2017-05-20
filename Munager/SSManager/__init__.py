@@ -30,8 +30,12 @@ class SSManager:
         for port, throughput in res_json.items():
             # check user information in redis
             if self._get_key(['user', port]).encode('utf-8') in redis_keys:
-                self.redis.hset(self._get_key(['user', port]), 'cursor', throughput)
-                self.logger.info('reset port: {} cursor: {}.'.format(port, throughput))
+                cursor = int(self.redis.hget(self._get_key(['user', port]), 'cursor').decode('utf-8'))
+                if cursor < throughput:
+                    self.logger.info('port: {} wait for upload throughput.'.format(port))
+                else:
+                    self.redis.hset(self._get_key(['user', port]), 'cursor', throughput)
+                    self.logger.info('reset port: {} cursor: {}.'.format(port, throughput))
             else:
                 # wait for next check and add information from MuAPI
                 self.logger.info('remove port: {} due to lost data in redis.'.format(port))
