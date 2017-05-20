@@ -29,7 +29,7 @@ class SSManager:
         redis_keys = self.redis.keys()
         for port, throughput in res_json.items():
             # check user information in redis
-            if self._get_key(['user', port]) in redis_keys:
+            if self._get_key(['user', port]).encode('utf-8') in redis_keys:
                 self.redis.hset(self._get_key(['user', port]), 'cursor', throughput)
                 self.logger.info('reset port: {} cursor: {}.'.format(port, throughput))
             else:
