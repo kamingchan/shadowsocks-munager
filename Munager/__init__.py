@@ -121,7 +121,7 @@ class Munager:
                     self.logger.info('update traffic: {} for port: {}.'.format(dif, port))
 
         # update online users count
-        result = yield self.mu_api.post_online_user()
+        result = yield self.mu_api.post_online_user(online_amount)
         if result:
             self.logger.info('upload online user count: {}.'.format(online_amount))
 
