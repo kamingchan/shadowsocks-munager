@@ -142,8 +142,6 @@ class Munager:
             callback_time=self._to_msecond(self.config.get('upload_throughput_period', 360)),
             io_loop=self.ioloop,
         ).start()
-        # reset on start
-        self.ioloop.run_sync(self.update_ss_manager)
         try:
             self.ioloop.start()
         except KeyboardInterrupt:

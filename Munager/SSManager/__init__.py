@@ -31,6 +31,7 @@ class SSManager:
             # check user information in redis
             if self._get_key(['user', port]) in redis_keys:
                 self.redis.hset(self._get_key(['user', port]), 'cursor', throughput)
+                self.logger.info('reset port: {} cursor: {}.'.format(port, throughput))
             else:
                 # wait for next check and add information from MuAPI
                 self.remove(port)
