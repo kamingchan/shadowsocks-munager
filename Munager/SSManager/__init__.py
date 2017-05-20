@@ -59,7 +59,7 @@ class SSManager:
         for port, throughput in res_json.items():
             info = self.redis.hgetall(self._get_key(['user', str(port)]))
             info = self._to_unicode(info)
-            info['throughput'] = throughput
+            info['cursor'] = throughput
             ret[int(port)] = info
         return ret
 
