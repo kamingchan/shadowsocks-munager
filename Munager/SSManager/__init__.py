@@ -34,6 +34,7 @@ class SSManager:
                 self.logger.info('reset port: {} cursor: {}.'.format(port, throughput))
             else:
                 # wait for next check and add information from MuAPI
+                self.logger.info('remove port: {} due to lost data in redis.'.format(port))
                 self.remove(port)
         self.logger.info('SSManager initializing.')
 
