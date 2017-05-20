@@ -95,3 +95,6 @@ class SSManager:
         req = req.encode('utf-8')
         self.cli.send(req)
         return self.cli.recv(1506) == b'ok'
+
+    def set_cursor(self, port, data):
+        self.redis.hset(self._get_key(['user', str(port)]), 'cursor', data)
