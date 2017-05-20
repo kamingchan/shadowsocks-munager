@@ -64,7 +64,7 @@ class MuAPI:
         try:
             response = yield self.client.fetch(_request)
             content = response.body
-            cont_json = json.loads(content)
+            cont_json = json.loads(content, encoding='utf-8')
             if cont_json.get('ret') != 1:
                 return False
             else:
@@ -77,8 +77,8 @@ class MuAPI:
     def get_users(self, key) -> dict:
         request = self._get_request('/mu/users')
         response = yield self.client.fetch(request)
-        content = response.body.decode('utf-8')
-        cont_json = json.loads(content)
+        content = response.body
+        cont_json = json.loads(content, encoding='utf-8')
         if cont_json.get('ret') != 1:
             raise MuAPIError(cont_json)
         ret = dict()
