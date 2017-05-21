@@ -22,6 +22,7 @@
 ### 安装依赖
 
 ```bash
+apt-get install redis-server
 pip3 install -r requirements.txt
 ```
 
