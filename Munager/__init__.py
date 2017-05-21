@@ -126,6 +126,11 @@ class Munager:
         if result:
             self.logger.info('upload online user count: {}.'.format(online_amount))
 
+    @staticmethod
+    def _to_msecond(period):
+        # s to ms
+        return period * 1000
+
     def run(self):
         # period task
         PeriodicCallback(
@@ -147,8 +152,3 @@ class Munager:
             self.ioloop.start()
         except KeyboardInterrupt:
             print('Bye~')
-
-    @staticmethod
-    def _to_msecond(period):
-        # s to ms
-        return period * 1000
