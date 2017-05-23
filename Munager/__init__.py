@@ -4,6 +4,7 @@ import psutil
 import yaml
 from tornado import gen
 from tornado.ioloop import IOLoop, PeriodicCallback
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 from Munager.MuAPI import MuAPI
 from Munager.SSManager import SSManager
@@ -27,11 +28,14 @@ class Munager:
         self.mu_api = MuAPI(self.config)
         self.ss_manager = SSManager(self.config)
         self.logger.debug('Munager initializing.')
+        
+        self.client = AsyncHTTPClient()
 
     @property
     @gen.coroutine
     def sys_status(self):
         wait_time = self.config.get('diff_time', 10)
+        test_time = self.config.get('test_time', 10)
 
         sent = psutil.net_io_counters().bytes_sent
         recv = psutil.net_io_counters().bytes_recv
@@ -47,6 +51,30 @@ class Munager:
         upload = round(sent_speed, 2)
         download = round(recv_speed, 2)
         uptime = time() - psutil.boot_time()
+
+        url = self.config.get('test_url')
+
+        req_para = dict(
+            url=url,
+            method='HEAD',
+            use_gzip=True,
+        )
+        request = HTTPRequest(**req_para)
+
+        error_counter = 0
+        delay = 0
+        for _ in range(test_time):
+            start = time()
+            try:
+                yield self.client.fetch(request)
+            except Exception as e:
+                self.logger.exception(e)
+                error_counter += 1
+            else:
+                delay += (time() - start)
+        # s to ms
+        delay = delay / (test_time - error_counter) * 1000
+
         return dict(
             cpu=cpu,
             vir=vir,
@@ -54,6 +82,7 @@ class Munager:
             upload=upload,
             download=download,
             uptime=uptime,
+            delay=delay,
         )
 
     @gen.coroutine

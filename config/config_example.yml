@@ -7,6 +7,9 @@ sspanel_url: 'https://panel.ss.com'
 key: 'this_is_mu_key'
 node_id: 14
 
+test_url: 'http://www.189.cn/gd/'
+test_time: 10
+
 diff_time: 10
 post_load_period: 60
 
