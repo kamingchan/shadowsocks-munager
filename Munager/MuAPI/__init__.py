@@ -43,9 +43,10 @@ class MuAPI:
         self.delay_sample = self.config.get('delay_sample')
         self.client = AsyncHTTPClient()
 
-    def _get_request(self, path, method='GET', formdata=None):
-        query = urlencode({'key': self.key})
-        url = urljoin(self.url_base, path) + '?' + query
+    def _get_request(self, path, query=dict(), method='GET', formdata=None):
+        query.update(key=self.key)
+        query_s = urlencode(query)
+        url = urljoin(self.url_base, path) + '?' + query_s
         req_para = dict(
             url=url,
             method=method,
@@ -89,16 +90,12 @@ class MuAPI:
 
     @gen.coroutine
     def get_delay(self) -> list:
-        delay_sample = urlencode({'delay_sample': self.delay_sample})
-        path = '/mu/nodes/{id}/delay'.format(id=self.node_id)
-        query = urlencode({'key': self.key})
-        url = urljoin(self.url_base, path) + '?' + delay_sample + '&' + query
-        req_para = dict(
-            url=url,
-            method='GET',
-            use_gzip=True,
+        request = self._get_request(
+            path='/mu/nodes/{id}/delay'.format(id=self.node_id),
+            query=dict(
+                sample=self.delay_sample,
+            ),
         )
-        request = HTTPRequest(**req_para)
         response = yield self.client.fetch(request)
         content = response.body.decode('utf-8')
         cont_json = json.loads(content, encoding='utf-8')
