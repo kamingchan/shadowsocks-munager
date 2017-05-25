@@ -40,6 +40,7 @@ class MuAPI:
         self.url_base = self.config.get('sspanel_url')
         self.key = self.config.get('key')
         self.node_id = self.config.get('node_id')
+        self.delay_sample = self.config.get('delay_sample')
         self.client = AsyncHTTPClient()
 
     def _get_request(self, path, method='GET', formdata=None):
@@ -85,6 +86,36 @@ class MuAPI:
         for user in cont_json.get('data'):
             ret[user.get(key)] = User(**user)
         return ret
+
+    @gen.coroutine
+    def get_delay(self) -> list:
+        delay_sample = urlencode({'delay_sample': self.delay_sample})
+        path = '/mu/nodes/{id}/delay'.format(id=self.node_id)
+        query = urlencode({'key': self.key})
+        url = urljoin(self.url_base, path) + '?' + delay_sample + '&' + query
+        req_para = dict(
+            url=url,
+            method='GET',
+            use_gzip=True,
+        )
+        request = HTTPRequest(**req_para)
+        response = yield self.client.fetch(request)
+        content = response.body.decode('utf-8')
+        cont_json = json.loads(content, encoding='utf-8')
+        if cont_json.get('ret') != 1:
+            raise MuAPIError(cont_json)
+        ret = cont_json.get('data')
+        return ret
+
+    @gen.coroutine
+    def post_delay_info(self, formdata):
+        request = self._get_request(
+            path='/mu/nodes/{id}/delay_info'.format(id=self.node_id),
+            method='POST',
+            formdata=formdata,
+        )
+        result = yield self._make_fetch(request)
+        return result
 
     @gen.coroutine
     def post_load(self, formdata):

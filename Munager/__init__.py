@@ -2,6 +2,7 @@ from time import time
 
 import psutil
 import yaml
+import numpy as np
 from tornado import gen
 from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
@@ -28,7 +29,7 @@ class Munager:
         self.mu_api = MuAPI(self.config)
         self.ss_manager = SSManager(self.config)
         self.logger.debug('Munager initializing.')
-        
+
         self.client = AsyncHTTPClient()
 
     @property
@@ -86,12 +87,36 @@ class Munager:
         )
 
     @gen.coroutine
+    def delay_info(self, delays):
+        delays.remove(max(delays))
+        delays.remove(min(delays))
+
+        delay_min = min(delays)
+        delay_max = max(delays)
+        mean = np.mean(delays)
+        standard_deviation = np.std(delays)
+        return dict(
+            min=delay_min,
+            max=delay_max,
+            mean=mean,
+            standard=standard_deviation,
+        )
+
+    @gen.coroutine
     def post_load(self):
         # cpu, vir, swp, upload, download, sent_speed, recv_speed = self.sys_status
         data = yield self.sys_status
         result = yield self.mu_api.post_load(data)
         if result:
             self.logger.info('post system load finished.')
+
+    @gen.coroutine
+    def post_delay_info(self):
+        delays = yield self.mu_api.get_delay()
+        data = yield self.delay_info(delays)
+        result = yield self.mu_api.post_delay_info(data)
+        if result:
+            self.logger.info('post delay info finished.')
 
     @gen.coroutine
     def update_ss_manager(self):
@@ -175,6 +200,11 @@ class Munager:
         PeriodicCallback(
             callback=self.upload_throughput,
             callback_time=self._to_msecond(self.config.get('upload_throughput_period', 360)),
+            io_loop=self.ioloop,
+        ).start()
+        PeriodicCallback(
+            callback=self.post_delay_info,
+            callback_time=self._to_msecond(self.config.get('post_delay_standard_period', 1296000)),
             io_loop=self.ioloop,
         ).start()
         try:
