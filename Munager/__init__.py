@@ -99,7 +99,7 @@ class Munager:
             min=delay_min,
             max=delay_max,
             mean=mean,
-            standard=standard_deviation,
+            standard_deviation=standard_deviation,
         )
 
     @gen.coroutine
