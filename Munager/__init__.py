@@ -1,11 +1,11 @@
 from time import time
 
+import numpy as np
 import psutil
 import yaml
-import numpy as np
 from tornado import gen
-from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+from tornado.ioloop import IOLoop, PeriodicCallback
 
 from Munager.MuAPI import MuAPI
 from Munager.SSManager import SSManager
@@ -86,7 +86,6 @@ class Munager:
             delay=delay,
         )
 
-    @gen.coroutine
     def delay_info(self, delays):
         delays.remove(max(delays))
         delays.remove(min(delays))
@@ -113,7 +112,7 @@ class Munager:
     @gen.coroutine
     def post_delay_info(self):
         delays = yield self.mu_api.get_delay()
-        data = yield self.delay_info(delays)
+        data = self.delay_info(delays)
         result = yield self.mu_api.post_delay_info(data)
         if result:
             self.logger.info('post delay info finished.')
@@ -204,7 +203,7 @@ class Munager:
         ).start()
         PeriodicCallback(
             callback=self.post_delay_info,
-            callback_time=self._to_msecond(self.config.get('post_delay_standard_period', 1296000)),
+            callback_time=self._to_msecond(self.config.get('post_delay_standard_period', 1296)),
             io_loop=self.ioloop,
         ).start()
         try:

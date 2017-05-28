@@ -101,8 +101,7 @@ class MuAPI:
         cont_json = json.loads(content, encoding='utf-8')
         if cont_json.get('ret') != 1:
             raise MuAPIError(cont_json)
-        ret = cont_json.get('data')
-        return ret
+        return cont_json.get('data', [])
 
     @gen.coroutine
     def post_delay_info(self, formdata):
