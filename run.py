@@ -7,6 +7,7 @@ from Munager import Munager
 @click.option('--config-file', default='./config/config.yml', help='Configuration file path.')
 def bootstrap(config_file):
     app = Munager(config_file)
+    app.post_delay_info()
     app.run()
 
 

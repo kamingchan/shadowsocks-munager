@@ -7,11 +7,13 @@ sspanel_url: 'https://panel.ss.com'
 key: 'this_is_mu_key'
 node_id: 14
 
-test_url: 'http://www.189.cn/gd/'
+test_url: 'http://gd.189.cn'
 test_time: 10
+delay_sample: 43200
 
 diff_time: 10
 post_load_period: 60
+post_delay_info_period: 129600
 
 manager_ip: '127.0.0.1'
 manager_port: 8839
