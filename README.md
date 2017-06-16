@@ -10,7 +10,7 @@
 
 ### 启动 ss-manager
 
-在生产环境应该使用 supervisor 进行守护，可以参考 `config/shadowsocks.conf` 文件。默认监听 IPv4 和 IPv6，不支持 IPv6 的主机请自行取掉；使用 `--acl` 参数，建议启用，防止访问本机以及局域网资源。。
+在生产环境应该使用 supervisor 进行守护，可以参考 `config/shadowsocks.conf` 文件。默认监听 IPv4 和 IPv6，不支持 IPv6 的主机请自行取掉；使用 `--acl` 参数，建议启用，防止访问本机以及局域网资源。
 
 ### 编辑 Mu API 配置
 
@@ -22,7 +22,8 @@
 ### 安装依赖
 
 ```bash
-apt-get install redis-server
+apt-get update -y
+apt-get install -y gcc redis-server python3-dev python3-pip python3-setuptools python3-psutil supervisor
 pip3 install -r requirements.txt
 ```
 
