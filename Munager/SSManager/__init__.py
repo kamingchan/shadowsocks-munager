@@ -10,12 +10,10 @@ class SSManager:
     def __init__(self, config):
         self.config = config
         self.logger = get_logger('SSManager', config)
-        self.cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.cli = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         self.cli.settimeout(self.config.get('timeout', 10))
-        self.cli.connect(
-            # (ip, port)
-            (self.config.get('manager_ip'), self.config.get('manager_port'))
-        )  # address of Shadowsocks manager
+        self.cli.bind('/tmp/shadowsocks-munager.sock')
+        self.cli.connect(self.config.get('manager_address'))  # address of Shadowsocks manager
         self.redis = Redis(
             host=self.config.get('redis_host', 'localhost'),
             port=self.config.get('redis_port', 6379),
