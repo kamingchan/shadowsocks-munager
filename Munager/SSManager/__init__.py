@@ -1,4 +1,5 @@
 import json
+import os
 import socket
 
 from redis import Redis
@@ -12,7 +13,7 @@ class SSManager:
         self.logger = get_logger('SSManager', config)
         self.cli = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         self.cli.settimeout(self.config.get('timeout', 10))
-        self.cli.bind('/tmp/shadowsocks-munager.sock')
+        self.cli.bind(self.config.get('bind_address'))
         self.cli.connect(self.config.get('manager_address'))  # address of Shadowsocks manager
         self.redis = Redis(
             host=self.config.get('redis_host', 'localhost'),
@@ -102,3 +103,8 @@ class SSManager:
 
     def set_cursor(self, port, data):
         self.redis.hset(self._get_key(['user', str(port)]), 'cursor', data)
+
+    def __del__(self):
+        bind_address = self.config.get('bind_address')
+        if os.path.exists(bind_address):
+            os.remove(bind_address)
