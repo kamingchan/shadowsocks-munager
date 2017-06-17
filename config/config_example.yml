@@ -13,10 +13,11 @@ delay_sample: 43200
 
 diff_time: 10
 post_load_period: 60
-post_delay_info_period: 129600
+upload_throughput_period: 600
+post_delay_standard_period: 129600
 
-manager_ip: '127.0.0.1'
-manager_port: 8839
+manager_address: '/var/run/shadowsocks-manager.sock'
+bind_address: '/tmp/shadowsocks-munager.sock'
 
 fast_open: true
 plugin: 'obfs-server'
