@@ -209,4 +209,6 @@ class Munager:
         try:
             self.ioloop.start()
         except KeyboardInterrupt:
+            del self.mu_api
+            del self.ss_manager
             print('Bye~')
