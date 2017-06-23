@@ -21,8 +21,9 @@
 apt-get update -y
 apt-get install -y gcc redis-server python3-dev python3-pip python3-setuptools python3-psutil
 pip3 install -r requirements.txt
-# install Node.js v7
+# install Node.js v8
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+apt-get install -y nodejs
 npm install -g pm2
 pm2 startup
 pm2 install pm2-logrotate
