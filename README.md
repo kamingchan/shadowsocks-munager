@@ -8,10 +8,6 @@
 
 推荐使用[秋水逸冰的脚本](https://shadowsocks.be/4.html)。
 
-### 启动 ss-manager
-
-在生产环境应该使用 supervisor 进行守护，可以参考 `config/shadowsocks.conf` 文件。默认监听 IPv4 和 IPv6，不支持 IPv6 的主机请自行取掉；使用 `--acl` 参数，建议启用，防止访问本机以及局域网资源。
-
 ### 编辑 Mu API 配置
 
 复制 `config_example.yml` 为 `config.yml`，修改对应参数。
@@ -23,13 +19,20 @@
 
 ```bash
 apt-get update -y
-apt-get install -y gcc redis-server python3-dev python3-pip python3-setuptools python3-psutil supervisor
+apt-get install -y gcc redis-server python3-dev python3-pip python3-setuptools python3-psutil
 pip3 install -r requirements.txt
+# install Node.js v7
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+npm install -g pm2
+pm2 startup
+pm2 install pm2-logrotate
 ```
 
-### 启动 Munager
+### 启动 ss-manager 与 Munager
 
-运行 `python3 run.py --config-file=config/config.yml` 运行脚本，在生产环境应该使用 supervisor 进行守护，可以参考 `shadowsocks.conf` 文件。
+运行 `python3 run.py --config-file=config/config.yml` 运行脚本，在生产环境应该使用 PM2 进行守护，可以参考 `pm2 start config/pm2.yml` 文件。
+
+一切部署成功后 `pm2 save` 保存配置。
 
 ## 已知 Bug
 
