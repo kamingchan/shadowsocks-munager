@@ -1,10 +1,10 @@
 apps:
-  - name: 'manager'
+  - name: 'ss-manager'
     script: '/usr/local/bin/ss-manager'
     args: '--manager-address /var/run/shadowsocks-manager.sock -s :: -s 0.0.0.0 -t 360 --acl /root/shadowsocks-munager/config/ss.acl'
     interpreter: null
 
-  - name: 'munager'
+  - name: 'ss-munager'
     script: 'run.py'
     cwd: '/root/shadowsocks-munager/'
     interpreter: '/usr/bin/python3'
