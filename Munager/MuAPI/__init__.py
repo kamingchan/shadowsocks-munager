@@ -23,6 +23,8 @@ class User:
         self.u = None
         self.d = None
         self.transfer_enable = None
+        self.plugin = None
+        self.plugin_opts = None
         self.__dict__.update(entries)
         # from Mu api
         # passwd: ss password
@@ -38,8 +40,6 @@ class MuAPI:
         self.logger = get_logger('MuAPI', config)
         self.config = config
         self.url_base = self.config.get('sspanel_url')
-        self.key = self.config.get('key')
-        self.node_id = self.config.get('node_id')
         self.delay_sample = self.config.get('delay_sample')
         self.client = AsyncHTTPClient()
 
@@ -98,7 +98,7 @@ class MuAPI:
     @gen.coroutine
     def get_delay(self) -> list:
         request = self._get_request(
-            path='/mu/nodes/{id}/delay'.format(id=self.node_id),
+            path='/mu/v2/node/delay',
             query=dict(
                 sample=self.delay_sample,
             ),
@@ -113,7 +113,7 @@ class MuAPI:
     @gen.coroutine
     def post_delay_info(self, formdata):
         request = self._get_request(
-            path='/mu/nodes/{id}/delay_info'.format(id=self.node_id),
+            path='/mu/v2/node/delay_info',
             method='POST',
             form_data=formdata,
         )
@@ -123,7 +123,7 @@ class MuAPI:
     @gen.coroutine
     def post_load(self, formdata):
         request = self._get_request(
-            path='/mu/nodes/{id}/info'.format(id=self.node_id),
+            path='/mu/v2/node/info',
             method='POST',
             form_data=formdata,
         )
@@ -133,7 +133,7 @@ class MuAPI:
     @gen.coroutine
     def post_online_user(self, amount):
         request = self._get_request(
-            path='/mu/nodes/{id}/online_count'.format(id=self.node_id),
+            path='/mu/v2/node/online_count',
             method='POST',
             form_data={
                 'count': amount,
@@ -143,15 +143,15 @@ class MuAPI:
         return result
 
     @gen.coroutine
-    def upload_throughput(self, user_id, traffic):
-        request = self._get_request(
-            path='/mu/users/{id}/traffic'.format(id=user_id),
-            method='POST',
-            form_data={
-                'u': 0,
-                'd': traffic,
-                'node_id': self.node_id
-            }
-        )
-        result = yield self._make_fetch(request)
-        return result
+    def upload_throughput(self, users) -> dict:
+        """
+        :param users: [{"id":1, "u":100, "d": 150}, ...]
+        :return:
+        """
+        request = self._get_request('/mu/v2/users/traffic', method='POST', json_data=users)
+        response = yield self.client.fetch(request)
+        content = response.body.decode('utf-8')
+        cont_json = json.loads(content, encoding='utf-8')
+        if cont_json.get('ret') != 1:
+            raise MuAPIError(cont_json)
+        return cont_json.get('data')
