@@ -1,3 +1,4 @@
+import json
 from time import time
 
 import numpy as np
@@ -22,7 +23,7 @@ class Munager:
         self.logger = get_logger('Munager', self.config)
 
         self.logger.debug('load config from {}.'.format(config_path))
-        self.logger.debug('config: {}'.format(self.config))
+        self.logger.debug('config: \n{}'.format(json.dumps(self.config, indent=2)))
 
         # mix
         self.ioloop = IOLoop.current()
@@ -121,7 +122,7 @@ class Munager:
     def update_ss_manager(self):
         # get from MuAPI and ss-manager
         users = yield self.mu_api.get_users('port')
-        state = self.ss_manager.state
+        state, _ = self.ss_manager.state
         self.logger.info('get MuAPI and ss-manager succeed, now begin to check ports.')
         self.logger.debug('get state from ss-manager: {}.'.format(state))
 
@@ -140,16 +141,23 @@ class Munager:
                         port=user.port,
                         password=user.passwd,
                         method=user.method,
+                        plugin=user.plugin,
+                        plugin_opts=user.plugin_opts,
                 ):
                     self.logger.info('add user at port: {}.'.format(user.port))
 
             if user.available and port in state:
-                if user.passwd != state.get(port).get('password') or user.method != state.get(port).get('method'):
+                if user.passwd != state.get(port).get('password') or \
+                                user.method != state.get(port).get('method') or \
+                                user.plugin != state.get(port).get('plugin') or \
+                                user.plugin_opts != state.get(port).get('plugin_opts'):
                     if self.ss_manager.remove(user.port) and self.ss_manager.add(
                             user_id=user_id,
                             port=user.port,
                             password=user.passwd,
                             method=user.method,
+                            plugin=user.plugin,
+                            plugin_opts=user.plugin_opts,
                     ):
                         self.logger.info('reset port {} due to method or password changed.'.format(user.port))
         # check finish
@@ -157,22 +165,40 @@ class Munager:
 
     @gen.coroutine
     def upload_throughput(self):
-        state = self.ss_manager.state
+        port_state, user_id_state = self.ss_manager.state
         online_amount = 0
-        for port, info in state.items():
+        post_data = list()
+        for port, info in port_state.items():
+            user_id = info.get('user_id')
             cursor = info.get('cursor')
             throughput = info.get('throughput')
             if throughput < cursor:
                 self.logger.warning('error throughput, try fix.')
-                self.ss_manager.set_cursor(port, throughput)
+                online_amount += 1
+                post_data.append(dict(
+                    id=user_id,
+                    u=0,
+                    d=throughput,
+                ))
             elif throughput > cursor:
                 online_amount += 1
                 dif = throughput - cursor
-                user_id = info.get('user_id')
-                result = yield self.mu_api.upload_throughput(user_id, dif)
-                if result:
-                    self.ss_manager.set_cursor(port, throughput)
-                    self.logger.info('update traffic: {} for port: {}.'.format(dif, port))
+                post_data.append(dict(
+                    id=user_id,
+                    u=0,
+                    d=dif,
+                ))
+        # upload to MuAPI
+        users = yield self.mu_api.upload_throughput(post_data)
+        for user_id, msg in users.items():
+            if msg == 'ok':
+                # user_id type is str
+                user = user_id_state.get(user_id)
+                throughput = user['throughput']
+                self.ss_manager.set_cursor(user['port'], throughput)
+                self.logger.info('update traffic for user: {}.'.format(user_id))
+            else:
+                self.logger.warning('fail to update traffic for user: {}.'.format(user_id))
 
         # update online users count
         result = yield self.mu_api.post_online_user(online_amount)
@@ -207,6 +233,8 @@ class Munager:
             io_loop=self.ioloop,
         ).start()
         try:
+            # Init task
+            self.ioloop.run_sync(self.update_ss_manager)
             self.ioloop.start()
         except KeyboardInterrupt:
             del self.mu_api
