@@ -43,8 +43,7 @@ class MuAPI:
         self.delay_sample = self.config.get('delay_sample')
         self.client = AsyncHTTPClient()
 
-    def _get_request(self, path, query=dict(), method='GET', formdata=None):
-        query.update(key=self.key)
+    def _get_request(self, path, query=dict(), method='GET', json_data=None, form_data=None):
         query_s = urlencode(query)
         url = urljoin(self.url_base, path) + '?' + query_s
         req_para = dict(
@@ -52,13 +51,21 @@ class MuAPI:
             method=method,
             use_gzip=True,
         )
-        if method == 'POST' and formdata:
+        if json_data:
             req_para.update(
-                body=urlencode(formdata),
+                body=json.dumps(json_data),
+                headers={
+                    'Content-Type': 'application/json; charset=utf-8',
+                }
+            )
+        elif form_data:
+            req_para.update(
+                body=urlencode(form_data),
                 headers={
                     'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
                 }
             )
+
         return HTTPRequest(**req_para)
 
     @gen.coroutine
@@ -77,7 +84,7 @@ class MuAPI:
 
     @gen.coroutine
     def get_users(self, key) -> dict:
-        request = self._get_request('/mu/users')
+        request = self._get_request('/mu/v2/users')
         response = yield self.client.fetch(request)
         content = response.body.decode('utf-8')
         cont_json = json.loads(content, encoding='utf-8')
@@ -108,7 +115,7 @@ class MuAPI:
         request = self._get_request(
             path='/mu/nodes/{id}/delay_info'.format(id=self.node_id),
             method='POST',
-            formdata=formdata,
+            form_data=formdata,
         )
         result = yield self._make_fetch(request)
         return result
@@ -118,7 +125,7 @@ class MuAPI:
         request = self._get_request(
             path='/mu/nodes/{id}/info'.format(id=self.node_id),
             method='POST',
-            formdata=formdata,
+            form_data=formdata,
         )
         result = yield self._make_fetch(request)
         return result
@@ -128,7 +135,7 @@ class MuAPI:
         request = self._get_request(
             path='/mu/nodes/{id}/online_count'.format(id=self.node_id),
             method='POST',
-            formdata={
+            form_data={
                 'count': amount,
             }
         )
@@ -140,7 +147,7 @@ class MuAPI:
         request = self._get_request(
             path='/mu/users/{id}/traffic'.format(id=user_id),
             method='POST',
-            formdata={
+            form_data={
                 'u': 0,
                 'd': traffic,
                 'node_id': self.node_id
