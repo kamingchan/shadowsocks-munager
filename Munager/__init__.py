@@ -1,28 +1,25 @@
 import json
+import logging
 from time import time
 
-import numpy as np
+import numpy
 import psutil
-import yaml
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from tornado.ioloop import IOLoop, PeriodicCallback
 
 from Munager.MuAPI import MuAPI
 from Munager.SSManager import SSManager
-from Munager.Utils import get_logger
 
 
 class Munager:
-    def __init__(self, config_path):
-        # load yaml config
-        with open(config_path) as f:
-            self.config = yaml.load(f.read())
+    def __init__(self, config):
+        self.config = config
 
-        # set logger
-        self.logger = get_logger('Munager', self.config)
+        # get logger
+        self.logger = logging.getLogger()
 
-        self.logger.debug('load config from {}.'.format(config_path))
+        # log config
         self.logger.debug('config: \n{}'.format(json.dumps(self.config, indent=2)))
 
         # mix
@@ -93,8 +90,8 @@ class Munager:
 
         delay_min = min(delays)
         delay_max = max(delays)
-        mean = np.mean(delays)
-        standard_deviation = np.std(delays)
+        mean = numpy.mean(delays)
+        standard_deviation = numpy.std(delays)
         return dict(
             min=delay_min,
             max=delay_max,

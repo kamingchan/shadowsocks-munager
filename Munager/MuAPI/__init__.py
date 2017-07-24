@@ -1,10 +1,9 @@
 import json
+from logging import getLogger
 from urllib.parse import urljoin, urlencode
 
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
-
-from Munager.Utils import get_logger
 
 
 class MuAPIError(Exception):
@@ -37,7 +36,7 @@ class User:
 
 class MuAPI:
     def __init__(self, config):
-        self.logger = get_logger('MuAPI', config)
+        self.logger = getLogger()
         self.config = config
         self.url_base = self.config.get('sspanel_url')
         self.delay_sample = self.config.get('delay_sample')
