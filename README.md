@@ -1,6 +1,6 @@
 # shadowsocks-munager
 
-兼容 Mu API 的 shadowsocks-server，通过调用 ss-manager 控制 ss-server，支持流量统计等一系列功能。
+~~兼容 Mu API 的 shadowsocks-server~~，新版已不支持原版 Mu API，通过调用 ss-manager 控制 ss-server，支持流量统计等一系列功能。
 
 ## 部署
 
