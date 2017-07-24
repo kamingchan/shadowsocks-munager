@@ -1,16 +1,15 @@
 import json
 import os
 import socket
+from logging import getLogger
 
 from redis import Redis
-
-from Munager.Utils import get_logger
 
 
 class SSManager:
     def __init__(self, config):
         self.config = config
-        self.logger = get_logger('SSManager', config)
+        self.logger = getLogger()
         self.cli = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         self.cli.settimeout(self.config.get('timeout', 10))
         self.cli.bind(self.config.get('bind_address'))
