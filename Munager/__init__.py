@@ -149,8 +149,8 @@ class Munager:
             if user.available and port in state:
                 if user.passwd != state.get(port).get('password') or \
                                 user.method != state.get(port).get('method') or \
-                                user.plugin != state.get(port).get('plugin') or \
-                                user.plugin_opts != state.get(port).get('plugin_opts'):
+                                str(user.plugin) != state.get(port).get('plugin') or \
+                                str(user.plugin_opts) != state.get(port).get('plugin_opts'):
                     if self.ss_manager.remove(user.port) and self.ss_manager.add(
                             user_id=user_id,
                             port=user.port,
