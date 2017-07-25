@@ -49,6 +49,12 @@ class SSManager:
             ret[k.decode('utf-8')] = v.decode('utf-8')
         return ret
 
+    @staticmethod
+    def _fix_type(_d):
+        # convert type when get a unicode dict from redis
+        _d['cursor'] = int(_d.get('cursor', 0))
+        return _d
+
     def _get_key(self, _keys):
         keys = [self.config.get('redis_prefix', 'mu')]
         keys.extend(_keys)
@@ -60,24 +66,27 @@ class SSManager:
         res = self.cli.recv(1506).decode('utf-8').replace('stat: ', '')
         # change key from str to int
         res_json = json.loads(res)
-        ret = dict()
+        ret_by_port, ret_by_uid = dict(), dict()
         for port, throughput in res_json.items():
             info = self.redis.hgetall(self._get_key(['user', str(port)]))
             info = self._to_unicode(info)
-            info['cursor'] = int(info.get('cursor', 0))
+            info = self._fix_type(info)
             info['throughput'] = throughput
-            ret[int(port)] = info
-        return ret
+            info['port'] = port
+            user_id = info.get('user_id')
+            ret_by_port[int(port)] = info
+            ret_by_uid[user_id] = info
+        return ret_by_port, ret_by_uid
 
-    def add(self, user_id, port, password, method):
+    def add(self, user_id, port, password, method, plugin, plugin_opts):
         msg = dict(
             server_port=port,
             password=password,
             method=method,
             fast_open=self.config.get('fast_open'),
             mode=self.config.get('mode'),
-            plugin=self.config.get('plugin'),
-            plugin_opts=self.config.get('plugin_opts'),
+            plugin=plugin,
+            plugin_opts=plugin_opts,
         )
         req = 'add: {msg}'.format(msg=json.dumps(msg))
         # to bytes
@@ -88,6 +97,8 @@ class SSManager:
         pipeline.hset(self._get_key(['user', str(port)]), 'user_id', user_id)
         pipeline.hset(self._get_key(['user', str(port)]), 'password', password)
         pipeline.hset(self._get_key(['user', str(port)]), 'method', method)
+        pipeline.hset(self._get_key(['user', str(port)]), 'plugin', plugin)
+        pipeline.hset(self._get_key(['user', str(port)]), 'plugin_opts', plugin_opts)
         pipeline.execute()
         return self.cli.recv(1506) == b'ok'
 

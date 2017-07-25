@@ -89,41 +89,6 @@ class MuAPI:
         return ret
 
     @gen.coroutine
-    def get_delay(self) -> list:
-        request = self._get_request(
-            path='/mu/nodes/{id}/delay'.format(id=self.node_id),
-            query=dict(
-                sample=self.delay_sample,
-            ),
-        )
-        response = yield self.client.fetch(request)
-        content = response.body.decode('utf-8')
-        cont_json = json.loads(content, encoding='utf-8')
-        if cont_json.get('ret') != 1:
-            raise MuAPIError(cont_json)
-        return cont_json.get('data', [])
-
-    @gen.coroutine
-    def post_delay_info(self, formdata):
-        request = self._get_request(
-            path='/mu/nodes/{id}/delay_info'.format(id=self.node_id),
-            method='POST',
-            formdata=formdata,
-        )
-        result = yield self._make_fetch(request)
-        return result
-
-    @gen.coroutine
-    def post_load(self, formdata):
-        request = self._get_request(
-            path='/mu/nodes/{id}/info'.format(id=self.node_id),
-            method='POST',
-            formdata=formdata,
-        )
-        result = yield self._make_fetch(request)
-        return result
-
-    @gen.coroutine
     def post_online_user(self, amount):
         request = self._get_request(
             path='/mu/nodes/{id}/online_count'.format(id=self.node_id),
