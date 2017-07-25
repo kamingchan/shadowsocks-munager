@@ -19,7 +19,7 @@ class Munager:
         self.ioloop = IOLoop.current()
         self.mu_api = MuAPI(self.config)
         self.ss_manager = SSManager(self.config)
-        self.logger.debug('Munager initializing.')
+        self.logger.info('Munager initializing.')
 
         self.client = AsyncHTTPClient()
 
