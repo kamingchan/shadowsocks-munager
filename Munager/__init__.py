@@ -70,40 +70,23 @@ class Munager:
 
     @gen.coroutine
     def upload_throughput(self):
-        port_state, user_id_state = self.ss_manager.state
+        state = self.ss_manager.state
         online_amount = 0
-        post_data = list()
-        for port, info in port_state.items():
-            user_id = info.get('user_id')
+        for port, info in state.items():
             cursor = info.get('cursor')
             throughput = info.get('throughput')
             if throughput < cursor:
-                self.logger.warning('error throughput, try fix.')
                 online_amount += 1
-                post_data.append(dict(
-                    id=user_id,
-                    u=0,
-                    d=throughput,
-                ))
+                self.logger.warning('error throughput, try fix.')
+                self.ss_manager.set_cursor(port, throughput)
             elif throughput > cursor:
                 online_amount += 1
                 dif = throughput - cursor
-                post_data.append(dict(
-                    id=user_id,
-                    u=0,
-                    d=dif,
-                ))
-        # upload to MuAPI
-        users = yield self.mu_api.upload_throughput(post_data)
-        for user_id, msg in users.items():
-            if msg == 'ok':
-                # user_id type is str
-                user = user_id_state.get(user_id)
-                throughput = user['throughput']
-                self.ss_manager.set_cursor(user['port'], throughput)
-                self.logger.info('update traffic for user: {}.'.format(user_id))
-            else:
-                self.logger.warning('fail to update traffic for user: {}.'.format(user_id))
+                user_id = info.get('user_id')
+                result = yield self.mu_api.upload_throughput(user_id, dif)
+                if result:
+                    self.ss_manager.set_cursor(port, throughput)
+                    self.logger.info('update traffic: {} for port: {}.'.format(dif, port))
 
         # update online users count
         result = yield self.mu_api.post_online_user(online_amount)

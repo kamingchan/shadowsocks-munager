@@ -60,22 +60,19 @@ class SSManager:
         return ':'.join(keys)
 
     @property
-    def state(self):
+    def state(self) -> dict:
         self.cli.send(b'ping')
         res = self.cli.recv(1506).decode('utf-8').replace('stat: ', '')
-        # change key from str to int
         res_json = json.loads(res)
-        ret_by_port, ret_by_uid = dict(), dict()
+        ret = dict()
         for port, throughput in res_json.items():
             info = self.redis.hgetall(self._get_key(['user', str(port)]))
             info = self._to_unicode(info)
             info = self._fix_type(info)
             info['throughput'] = throughput
             info['port'] = port
-            user_id = info.get('user_id')
-            ret_by_port[int(port)] = info
-            ret_by_uid[user_id] = info
-        return ret_by_port, ret_by_uid
+            ret[int(port)] = info
+        return ret
 
     def add(self, user_id, port, password, method, plugin, plugin_opts):
         msg = dict(
