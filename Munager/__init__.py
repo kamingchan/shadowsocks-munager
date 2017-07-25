@@ -1,26 +1,19 @@
-import json
+import logging
 
-import yaml
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop, PeriodicCallback
 
 from Munager.MuAPI import MuAPI
 from Munager.SSManager import SSManager
-from Munager.Utils import get_logger
 
 
 class Munager:
-    def __init__(self, config_path):
-        # load yaml config
-        with open(config_path) as f:
-            self.config = yaml.load(f.read())
+    def __init__(self, config):
+        self.config = config
 
         # set logger
-        self.logger = get_logger('Munager', self.config)
-
-        self.logger.debug('load config from {}.'.format(config_path))
-        self.logger.debug('config: \n{}'.format(json.dumps(self.config, indent=2)))
+        self.logger = logging.getLogger()
 
         # mix
         self.ioloop = IOLoop.current()
