@@ -1,25 +1,16 @@
-log_format: '[%(name)s][%(asctime)s][%(lineno)3d][%(levelname)7s] %(message)s'
+log_format: '[%(asctime)s][%(lineno)3d][%(levelname)s] %(message)s'
 date_time_format: '%m-%d %H:%M:%S'
 log_level: 'DEBUG'
-
 
 sspanel_url: 'https://panel.ss.com'
 key: 'this_is_mu_key'
 node_id: 14
 
-test_url: 'http://gd.189.cn'
-test_time: 10
-delay_sample: 43200
-
-diff_time: 10
-post_load_period: 60
-upload_throughput_period: 600
-post_delay_standard_period: 129600
+upload_throughput_period: 60
+update_port_period: 60
 
 manager_address: '/var/run/shadowsocks-manager.sock'
 bind_address: '/tmp/shadowsocks-munager.sock'
 
 fast_open: true
-plugin: 'obfs-server'
-plugin_opts: 'obfs=http;fast-open'
 mode: 'tcp_and_udp'

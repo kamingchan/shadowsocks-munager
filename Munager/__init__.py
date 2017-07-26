@@ -1,7 +1,7 @@
 import logging
 
 from tornado import gen
-from tornado.httpclient import AsyncHTTPClient
+from tornado.httpclient import AsyncHTTPClient, HTTPError
 from tornado.ioloop import IOLoop, PeriodicCallback
 
 from Munager.MuAPI import MuAPI
@@ -27,7 +27,7 @@ class Munager:
     def update_ss_manager(self):
         # get from MuAPI and ss-manager
         users = yield self.mu_api.get_users('port')
-        state, _ = self.ss_manager.state
+        state = self.ss_manager.state
         self.logger.info('get MuAPI and ss-manager succeed, now begin to check ports.')
         self.logger.debug('get state from ss-manager: {}.'.format(state))
 
@@ -83,18 +83,23 @@ class Munager:
                 online_amount += 1
                 dif = throughput - cursor
                 user_id = info.get('user_id')
-                result = yield self.mu_api.upload_throughput(user_id, dif)
-                if result:
-                    self.ss_manager.set_cursor(port, throughput)
-                    self.logger.info('update traffic: {} for port: {}.'.format(dif, port))
+                try:
+                    result = yield self.mu_api.upload_throughput(user_id, dif)
+                    if result:
+                        self.ss_manager.set_cursor(port, throughput)
+                        self.logger.info('update traffic: {} for port: {}.'.format(dif, port))
+
 
         # update online users count
-        result = yield self.mu_api.post_online_user(online_amount)
-        if result:
-            self.logger.info('upload online user count: {}.'.format(online_amount))
+        try:
+            result = yield self.mu_api.post_online_user(online_amount)
+            if result:
+                self.logger.info('upload online user count: {}.'.format(online_amount))
+        except HTTPError:
+            self.logger.warning('failed to upload online user count.')
 
     @staticmethod
-    def _to_msecond(period):
+    def _second_to_msecond(period):
         # s to ms
         return period * 1000
 
@@ -102,12 +107,12 @@ class Munager:
         # period task
         PeriodicCallback(
             callback=self.update_ss_manager,
-            callback_time=self._to_msecond(self.config.get('update_port_period', 60)),
+            callback_time=self._second_to_msecond(self.config.get('update_port_period', 60)),
             io_loop=self.ioloop,
         ).start()
         PeriodicCallback(
             callback=self.upload_throughput,
-            callback_time=self._to_msecond(self.config.get('upload_throughput_period', 360)),
+            callback_time=self._second_to_msecond(self.config.get('upload_throughput_period', 360)),
             io_loop=self.ioloop,
         ).start()
         try:
