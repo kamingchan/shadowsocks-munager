@@ -12,9 +12,12 @@ diff_time: 10
 post_load_period: 60
 upload_throughput_period: 600
 post_delay_standard_period: 129600
+memory_watcher_period: 600
 
 manager_address: '/var/run/shadowsocks-manager.sock'
 bind_address: '/tmp/shadowsocks-munager.sock'
 
 fast_open: true
 mode: 'tcp_and_udp'
+
+reset_memory_threshold: 95

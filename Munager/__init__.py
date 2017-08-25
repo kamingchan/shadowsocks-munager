@@ -202,6 +202,18 @@ class Munager:
         if result:
             self.logger.info('upload online user count: {}.'.format(online_amount))
 
+    @gen.coroutine
+    def memory_leak_watcher(self):
+        memory = psutil.virtual_memory().percent
+        if memory > self.config.get('reset_memory_threshold', 95):
+            self.logger.info('current memory is {}, now begin to reset ss-manager.'.format(memory))
+            yield self.upload_throughput()
+            self.ss_manager.clear()
+            yield self.update_ss_manager()
+            self.logger.info('current memory is {} after reset ss-manager.'.format(memory))
+        else:
+            self.logger.info('current memory is {}, need not to reset ss-manager.'.format(memory))
+
     @staticmethod
     def _to_msecond(period):
         # s to ms
@@ -227,6 +239,11 @@ class Munager:
         PeriodicCallback(
             callback=self.post_delay_info,
             callback_time=self._to_msecond(self.config.get('post_delay_standard_period', 1296)),
+            io_loop=self.ioloop,
+        ).start()
+        PeriodicCallback(
+            callback=self.memory_leak_watcher,
+            callback_time=self._to_msecond(self.config.get('memory_watcher_period', 600)),
             io_loop=self.ioloop,
         ).start()
         try:
