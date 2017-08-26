@@ -1,12 +1,14 @@
 import json
 import logging
+import socket
 from time import time
 
 import numpy
 import psutil
 from tornado import gen
-from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop, PeriodicCallback
+from tornado.tcpclient import TCPClient
 
 from Munager.MuAPI import MuAPI
 from Munager.SSManager import SSManager
@@ -28,13 +30,13 @@ class Munager:
         self.ss_manager = SSManager(self.config)
         self.logger.debug('Munager initializing.')
 
-        self.client = AsyncHTTPClient()
+        self.http_client = AsyncHTTPClient()
+        self.tcp_client = TCPClient()
 
     @property
     @gen.coroutine
     def sys_status(self):
         wait_time = self.config.get('diff_time', 10)
-        test_time = self.config.get('test_time', 10)
 
         sent = psutil.net_io_counters().bytes_sent
         recv = psutil.net_io_counters().bytes_recv
@@ -51,28 +53,27 @@ class Munager:
         download = round(recv_speed, 2)
         uptime = time() - psutil.boot_time()
 
-        url = self.config.get('test_url')
+        # tcp ping
+        host = self.config.get('test_host', 'gd.189.cn')
+        port = self.config.get('test_port', 80)
+        test_time = self.config.get('test_time', 10)
 
-        req_para = dict(
-            url=url,
-            method='HEAD',
-            use_gzip=True,
-        )
-        request = HTTPRequest(**req_para)
-
-        error_counter = 0
-        delay = 0
+        fail = 0
+        rtt_list = list()
         for _ in range(test_time):
             start = time()
             try:
-                yield self.client.fetch(request)
+                stream = yield self.tcp_client.connect(host, port, socket.AF_INET)
+                rtt_list.append(time() - start)
+                stream.close()
             except Exception as e:
                 self.logger.exception(e)
-                error_counter += 1
-            else:
-                delay += (time() - start)
-        # s to ms
-        delay = delay / (test_time - error_counter) * 1000
+                fail += 1
+
+        # remove the max and min, s to ms
+        rtt_list = sorted(rtt_list)[1:-1]
+        rtt = round(sum(rtt_list) / len(rtt_list) * 1000, 2)
+        loss = fail / test_time
 
         return dict(
             cpu=cpu,
@@ -81,7 +82,8 @@ class Munager:
             upload=upload,
             download=download,
             uptime=uptime,
-            delay=delay,
+            rtt=rtt,
+            loss=loss,
         )
 
     def delay_info(self, delays):
@@ -222,11 +224,6 @@ class Munager:
         PeriodicCallback(
             callback=self.upload_throughput,
             callback_time=self._to_msecond(self.config.get('upload_throughput_period', 360)),
-            io_loop=self.ioloop,
-        ).start()
-        PeriodicCallback(
-            callback=self.post_delay_info,
-            callback_time=self._to_msecond(self.config.get('post_delay_standard_period', 1296)),
             io_loop=self.ioloop,
         ).start()
         try:
