@@ -211,8 +211,8 @@ class Munager:
 
     @gen.coroutine
     def memory_leak_watcher(self):
-        memory = psutil.virtual_memory().percent
-        if memory > self.config.get('reset_memory_threshold', 95):
+        memory = psutil.swap_memory().percent
+        if memory > self.config.get('reset_memory_threshold', 15):
             self.logger.info('current memory is {}, now begin to reset ss-manager.'.format(memory))
             yield self.upload_throughput()
             self.ss_manager.clear()
