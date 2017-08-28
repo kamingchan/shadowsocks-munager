@@ -4,17 +4,19 @@ log_level: 'DEBUG'
 
 sspanel_url: 'https://panel.ss.com'
 
-test_url: 'http://gd.189.cn'
+test_host: 'gd.189.cn'
+test_port: 80
 test_time: 10
-delay_sample: 43200
 
 diff_time: 10
 post_load_period: 60
 upload_throughput_period: 600
-post_delay_standard_period: 129600
+memory_watcher_period: 600
 
 manager_address: '/var/run/shadowsocks-manager.sock'
 bind_address: '/tmp/shadowsocks-munager.sock'
 
 fast_open: true
 mode: 'tcp_and_udp'
+
+reset_memory_threshold: 15
