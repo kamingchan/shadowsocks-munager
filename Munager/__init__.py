@@ -193,6 +193,7 @@ class Munager:
                         d=dif,
                     ))
             # upload to MuAPI
+            self.logger.info('post data: ', post_data)
             users = yield self.mu_api.upload_throughput(post_data)
             for user_id, msg in users.items():
                 if msg == 'ok':
