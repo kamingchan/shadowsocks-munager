@@ -29,12 +29,12 @@ class Munager:
         self.ioloop = IOLoop.current()
         self.mu_api = MuAPI(self.config)
         self.ss_manager = SSManager(self.config)
-        self.logger.debug('Munager initializing.')
+        self.ss_manager_lock = Lock()
 
         self.http_client = AsyncHTTPClient()
         self.tcp_client = TCPClient()
 
-        self.ss_manager_lock = Lock()
+        self.logger.debug('Munager initializing.')
 
     @property
     @gen.coroutine
@@ -192,18 +192,18 @@ class Munager:
                         u=0,
                         d=dif,
                     ))
-            # upload to MuAPI
-            self.logger.info('post data: ', post_data)
-            users = yield self.mu_api.upload_throughput(post_data)
-            for user_id, msg in users.items():
-                if msg == 'ok':
-                    # user_id type is str
-                    user = user_id_state.get(user_id)
-                    throughput = user['throughput']
-                    self.ss_manager.set_cursor(user['port'], throughput)
-                    self.logger.info('update traffic for user: {}.'.format(user_id))
-                else:
-                    self.logger.warning('fail to update traffic for user: {}.'.format(user_id))
+            if post_data:
+                # upload to MuAPI
+                users = yield self.mu_api.upload_throughput(post_data)
+                for user_id, msg in users.items():
+                    if msg == 'ok':
+                        # user_id type is str
+                        user = user_id_state.get(user_id)
+                        throughput = user['throughput']
+                        self.ss_manager.set_cursor(user['port'], throughput)
+                        self.logger.info('update traffic for user: {}.'.format(user_id))
+                    else:
+                        self.logger.warning('fail to update traffic for user: {}.'.format(user_id))
 
             # update online users count
             result = yield self.mu_api.post_online_user(online_amount)
@@ -252,8 +252,9 @@ class Munager:
         try:
             # Init task
             self.ioloop.run_sync(self.update_ss_manager)
+            self.logger.info('Starting IOLoop.')
             self.ioloop.start()
         except KeyboardInterrupt:
             del self.mu_api
             del self.ss_manager
-            print('Bye~')
+            self.logger.info('Exiting...')
