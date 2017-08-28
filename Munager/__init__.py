@@ -204,10 +204,10 @@ class Munager:
                 else:
                     self.logger.warning('fail to update traffic for user: {}.'.format(user_id))
 
-        # update online users count
-        result = yield self.mu_api.post_online_user(online_amount)
-        if result:
-            self.logger.info('upload online user count: {}.'.format(online_amount))
+            # update online users count
+            result = yield self.mu_api.post_online_user(online_amount)
+            if result:
+                self.logger.info('upload online user count: {}.'.format(online_amount))
 
     @gen.coroutine
     def memory_leak_watcher(self):
