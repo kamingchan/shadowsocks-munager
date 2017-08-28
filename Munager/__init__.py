@@ -46,7 +46,7 @@ class Munager:
         yield gen.sleep(wait_time)
         current_sent = psutil.net_io_counters().bytes_sent
         current_recv = psutil.net_io_counters().bytes_recv
-        # change in to killo bytes
+        # change in to kilobytes
         sent_speed = (current_sent - sent) / wait_time * 8 / 1024
         recv_speed = (current_recv - recv) / wait_time * 8 / 1024
         cpu = psutil.cpu_percent()
