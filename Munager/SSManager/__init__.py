@@ -111,10 +111,11 @@ class SSManager:
         self.cli.send(req)
         return self.cli.recv(1506) == b'ok'
 
-    def clear(self):
+    def clear_inactive_port(self):
         ports, _ = self.state
-        for port in ports:
-            self.remove(port)
+        for port, info in ports.items():
+            if info.get('cursor') == info.get('throughput'):
+                self.remove(port)
 
     def set_cursor(self, port, data):
         self.redis.hset(self._get_key(['user', str(port)]), 'cursor', data)

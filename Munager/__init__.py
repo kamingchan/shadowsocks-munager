@@ -216,7 +216,7 @@ class Munager:
         if memory > self.config.get('reset_memory_threshold', 15):
             self.logger.info('current memory is {}, now begin to reset ss-manager.'.format(memory))
             yield self.upload_throughput()
-            self.ss_manager.clear()
+            self.ss_manager.clear_inactive_port()
             yield self.update_ss_manager()
             self.logger.info('current memory is {} after reset ss-manager.'.format(memory))
         else:
