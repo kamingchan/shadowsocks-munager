@@ -43,7 +43,7 @@ class SSManager:
                 self.remove(port)
             # Sync user information from Redis to SNIProxy
             password = self.redis.hget(self._get_key(['user', port]), 'password').decode('utf-8')
-            self.sniproxy.add(port, password)
+            self.sniproxy.add(int(port), password)  # port should be int here
         self.logger.info('SSManager initializing.')
 
     @staticmethod
