@@ -97,7 +97,7 @@ class SSManager:
         # to bytes
         req = req.encode('utf-8')
         self.cli.send(req)
-        self.sniproxy.add(port, password)
+        self.sniproxy.add(int(port), password)  # port should be int here
         pipeline = self.redis.pipeline()
         pipeline.hset(self._get_key(['user', str(port)]), 'cursor', 0)
         pipeline.hset(self._get_key(['user', str(port)]), 'user_id', user_id)
@@ -109,8 +109,9 @@ class SSManager:
         return self.cli.recv(1506) == b'ok'
 
     def remove(self, port):
+        port = int(port)
         msg = dict(
-            server_port=int(port),
+            server_port=port,
         )
         req = 'remove: {msg}'.format(msg=json.dumps(msg))
         req = req.encode('utf-8')
