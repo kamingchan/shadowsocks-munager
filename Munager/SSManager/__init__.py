@@ -109,9 +109,8 @@ class SSManager:
         return self.cli.recv(1506) == b'ok'
 
     def remove(self, port):
-        port = int(port)
         msg = dict(
-            server_port=port,
+            server_port=int(port),
         )
         req = 'remove: {msg}'.format(msg=json.dumps(msg))
         req = req.encode('utf-8')
