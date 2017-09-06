@@ -5,6 +5,8 @@ from logging import getLogger
 
 from redis import Redis
 
+from Munager import SNIProxy
+
 
 class SSManager:
     def __init__(self, config):
@@ -19,6 +21,7 @@ class SSManager:
             port=self.config.get('redis_port', 6379),
             db=self.config.get('redis_db', 0),
         )
+        self.sniproxy = SNIProxy(self.config)
 
         # load throughput log to redis
         self.cli.send(b'ping')
@@ -91,6 +94,7 @@ class SSManager:
         # to bytes
         req = req.encode('utf-8')
         self.cli.send(req)
+        self.sniproxy.add(port, '{port}.{password}'.format(port=port, password=password))
         pipeline = self.redis.pipeline()
         pipeline.hset(self._get_key(['user', str(port)]), 'cursor', 0)
         pipeline.hset(self._get_key(['user', str(port)]), 'user_id', user_id)
@@ -109,6 +113,7 @@ class SSManager:
         req = 'remove: {msg}'.format(msg=json.dumps(msg))
         req = req.encode('utf-8')
         self.cli.send(req)
+        self.sniproxy.remove(port)
         return self.cli.recv(1506) == b'ok'
 
     def reset_inactive_port(self):

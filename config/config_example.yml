@@ -16,6 +16,9 @@ memory_watcher_period: 600
 manager_address: '/var/run/shadowsocks-manager.sock'
 bind_address: '/tmp/shadowsocks-munager.sock'
 
+sniproxy_conf_file: '/etc/sniproxy.conf'
+sniproxy_pid_file: '/tmp/sniproxy.pid'
+
 fast_open: true
 mode: 'tcp_and_udp'
 
