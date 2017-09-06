@@ -13,7 +13,6 @@ from tornado.tcpclient import TCPClient
 
 from Munager.MuAPI import MuAPI
 from Munager.SSManager import SSManager
-from Munager.SSManager.SNIProxy import SNIProxy
 
 
 class Munager:

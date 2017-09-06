@@ -5,7 +5,7 @@ from logging import getLogger
 
 from redis import Redis
 
-from Munager import SNIProxy
+from Munager.SSManager.SNIProxy import SNIProxy
 
 
 class SSManager:
