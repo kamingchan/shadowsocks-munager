@@ -252,7 +252,7 @@ class Munager:
         try:
             # Init task
             self.ioloop.run_sync(self.update_ss_manager)
-            self.logger.info('Starting IOLoop.')
+            self.logger.info('starting IOLoop.')
             self.ioloop.start()
         except KeyboardInterrupt:
             del self.mu_api
