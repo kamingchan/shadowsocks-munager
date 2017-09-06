@@ -41,6 +41,9 @@ class SSManager:
                 # wait for next check and add information from MuAPI
                 self.logger.info('remove port: {} due to lost data in redis.'.format(port))
                 self.remove(port)
+            # Sync user information from Redis to SNIProxy
+            password = self.redis.hget(self._get_key(['user', port]), 'password').decode('utf-8')
+            self.sniproxy.add(port, password)
         self.logger.info('SSManager initializing.')
 
     @staticmethod
@@ -94,7 +97,7 @@ class SSManager:
         # to bytes
         req = req.encode('utf-8')
         self.cli.send(req)
-        self.sniproxy.add(port, '{port}.{password}'.format(port=port, password=password))
+        self.sniproxy.add(port, password)
         pipeline = self.redis.pipeline()
         pipeline.hset(self._get_key(['user', str(port)]), 'cursor', 0)
         pipeline.hset(self._get_key(['user', str(port)]), 'user_id', user_id)
