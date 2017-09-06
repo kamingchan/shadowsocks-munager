@@ -13,6 +13,7 @@ class SNIProxy:
         self.pid_file = self.config.get('sniproxy_pid_file', '/tmp/sniproxy.pid')
         self.conf_file = self.config.get('sniproxy_conf_file', '/etc/sniproxy.conf')
         self.ports = dict()
+        self.logger.info('SNIProxy initializing.')
 
     @property
     def configuration(self):
