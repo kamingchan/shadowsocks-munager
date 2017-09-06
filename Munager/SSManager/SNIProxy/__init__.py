@@ -45,7 +45,7 @@ table tls {
 %s
 }
 '''
-        port_list = '\n'.join(map(lambda port, domain: '%s 127.0.0.1:%s' % (domain, port), self._ports.items()))
+        port_list = '\n'.join(map(lambda x: '%s 127.0.0.1:%s' % (x[1], x[0]), self._ports.items()))
         return TEMPLATE % (self.pid_file, port_list, port_list)
 
     def _write_configuration_file(self):
