@@ -11,7 +11,7 @@
 ### 编译安装 [sniproxy](https://github.com/dlundquist/sniproxy)
 
 ```bash
-apt-get install autotools-dev cdbs debhelper dh-autoreconf dpkg-dev gettext libev-dev libpcre3-dev libudns-dev pkg-config fakeroot devscripts
+apt-get install -y autotools-dev cdbs debhelper dh-autoreconf dpkg-dev gettext libev-dev libpcre3-dev libudns-dev pkg-config fakeroot devscripts
 git clone https://github.com/dlundquist/sniproxy.git
 ./autogen.sh
 ./configure
