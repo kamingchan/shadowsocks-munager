@@ -8,6 +8,17 @@
 
 推荐使用[秋水逸冰的脚本](https://shadowsocks.be/4.html)。
 
+### 编译安装 [sniproxy](https://github.com/dlundquist/sniproxy)
+
+```bash
+apt-get install autotools-dev cdbs debhelper dh-autoreconf dpkg-dev gettext libev-dev libpcre3-dev libudns-dev pkg-config fakeroot devscripts
+git clone https://github.com/dlundquist/sniproxy.git
+./autogen.sh
+./configure
+make
+make install
+```
+
 ### 编辑 Mu API 配置
 
 复制 `config_example.yml` 为 `config.yml`，修改对应参数。
