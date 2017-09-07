@@ -12,7 +12,7 @@ class SNIProxy:
         self.logger = getLogger()
         self.pid_file = self.config.get('sniproxy_pid_file', '/tmp/sniproxy.pid')
         self.conf_file = self.config.get('sniproxy_conf_file', '/etc/sniproxy.conf')
-        self._ports = dict()
+        self._ports = set()
         self.logger.info('SNIProxy initializing.')
 
     @property
@@ -45,7 +45,7 @@ table tls {
 %s
 }
 '''
-        port_list = '\n'.join(map(lambda x: '%s 127.0.0.1:%s' % (x[1], x[0]), self._ports.items()))
+        port_list = '\n'.join(map(lambda x: '{port} 127.0.0.1:{port}'.format(port=x), self._ports))
         return TEMPLATE % (self.pid_file, port_list, port_list)
 
     def _write_configuration_file(self):
@@ -80,14 +80,14 @@ table tls {
     def _run(self):
         return subprocess.call(['sniproxy', '-c', self.conf_file]) == 0
 
-    def add(self, port, password):
-        self._ports[port] = '{port}.{password}'.format(port=port, password=password)
+    def add(self, port):
+        self._ports.add(port)
         self._write_configuration_file()
         self._reload()
         self.logger.info('add port: {} to SNIProxy.'.format(port))
 
     def remove(self, port):
-        del self._ports[port]
+        self._ports.remove(port)
         self._write_configuration_file()
         self._reload()
         self.logger.info('remove port: {} from SNIProxy.'.format(port))

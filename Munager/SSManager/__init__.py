@@ -42,8 +42,7 @@ class SSManager:
                 self.logger.info('remove port: {} due to lost data in redis.'.format(port))
                 self.remove(port)
             # Sync user information from Redis to SNIProxy
-            password = self.redis.hget(self._get_key(['user', port]), 'password').decode('utf-8')
-            self.sniproxy.add(int(port), password)  # port should be int here
+            self.sniproxy.add(int(port))  # port should be int here
         self.logger.info('SSManager initializing.')
 
     @staticmethod
@@ -97,7 +96,7 @@ class SSManager:
         # to bytes
         req = req.encode('utf-8')
         self.cli.send(req)
-        self.sniproxy.add(int(port), password)  # port should be int here
+        self.sniproxy.add(int(port))  # port should be int here
         pipeline = self.redis.pipeline()
         pipeline.hset(self._get_key(['user', str(port)]), 'cursor', 0)
         pipeline.hset(self._get_key(['user', str(port)]), 'user_id', user_id)
