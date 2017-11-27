@@ -49,3 +49,17 @@ services:
 ```bash
 docker-compose up -d
 ```
+
+### Show logs
+
+```bash
+docker-compose logs
+```
+
+## Update images from Docker Hub
+
+```bash
+docker-compose pull
+docker-compose kill
+docker-compose up -d
+```
