@@ -1,0 +1,29 @@
+log_format: '[%(name)s][%(asctime)s][%(lineno)3d][%(levelname)7s] %(message)s'
+date_time_format: '%m-%d %H:%M:%S'
+log_level: 'INFO'
+
+sspanel_url: 'https://api.example.com'
+
+test_host: 'gd.189.cn'
+test_port: 80
+test_time: 10
+
+diff_time: 10
+post_load_period: 60
+upload_throughput_period: 600
+memory_watcher_period: 600
+ip_watcher_period: 30
+upload_connection_ip_period: 3600
+
+redis_host: 'redis'
+redis_port: 6379
+redis_db: 0
+
+enable_sniproxy: false
+
+manager_host: 'ss-manager'
+manager_port: 8839
+
+fast_open: true
+mode: 'tcp_and_udp'
+reset_memory_threshold: 15

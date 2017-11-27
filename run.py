@@ -1,4 +1,5 @@
 import logging
+import os
 
 import click
 import yaml
@@ -9,9 +10,13 @@ from Munager import Munager
 @click.command()
 @click.option('--config-file', default='./config/config.yml', help='Configuration file path.')
 def bootstrap(config_file):
-    # load yaml config
+    # load config
     with open(config_file) as f:
         config = yaml.load(f.read())
+
+    # replace config with environment variables
+    env_variables = os.environ
+    config.update(env_variables)
 
     # set logger
     logger = logging.getLogger()
@@ -25,7 +30,6 @@ def bootstrap(config_file):
     logger.setLevel(config.get('log_level', 'DEBUG'))
     logger.debug('load config from {}.'.format(config_file))
 
-    # run
     app = Munager(config)
     app.run()
 

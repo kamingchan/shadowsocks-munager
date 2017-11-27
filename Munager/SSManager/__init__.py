@@ -1,24 +1,28 @@
 import json
-import logging
-import os
 import socket
+from logging import getLogger
 
 from redis import Redis
+
+from Munager.SSManager.SNIProxy import SNIProxy
 
 
 class SSManager:
     def __init__(self, config):
         self.config = config
-        self.logger = logging.getLogger()
-        self.cli = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        self.logger = getLogger()
+        self.cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.cli.settimeout(self.config.get('timeout', 10))
-        self.cli.bind(self.config.get('bind_address'))
-        self.cli.connect(self.config.get('manager_address'))  # address of Shadowsocks manager
+        address = (self.config.get('manager_host'), self.config.get('manager_port'))
+        self.cli.connect(address)  # address of Shadowsocks manager
         self.redis = Redis(
             host=self.config.get('redis_host', 'localhost'),
             port=self.config.get('redis_port', 6379),
             db=self.config.get('redis_db', 0),
         )
+        self.enable_sniproxy = self.config.get('enable_sniproxy')
+        if self.enable_sniproxy:
+            self.sniproxy = SNIProxy(self.config)
 
         # load throughput log to redis
         self.cli.send(b'ping')
@@ -38,6 +42,9 @@ class SSManager:
                 # wait for next check and add information from MuAPI
                 self.logger.info('remove port: {} due to lost data in redis.'.format(port))
                 self.remove(port)
+            # Sync user information from Redis to SNIProxy
+            if self.enable_sniproxy:
+                self.sniproxy.add(int(port))  # port should be int here
         self.logger.info('SSManager initializing.')
 
     @staticmethod
@@ -60,19 +67,22 @@ class SSManager:
         return ':'.join(keys)
 
     @property
-    def state(self) -> dict:
+    def state(self):
         self.cli.send(b'ping')
         res = self.cli.recv(1506).decode('utf-8').replace('stat: ', '')
+        # change key from str to int
         res_json = json.loads(res)
-        ret = dict()
+        ret_by_port, ret_by_uid = dict(), dict()
         for port, throughput in res_json.items():
             info = self.redis.hgetall(self._get_key(['user', str(port)]))
             info = self._to_unicode(info)
             info = self._fix_type(info)
             info['throughput'] = throughput
             info['port'] = port
-            ret[int(port)] = info
-        return ret
+            user_id = info.get('user_id')
+            ret_by_port[int(port)] = info
+            ret_by_uid[user_id] = info
+        return ret_by_port, ret_by_uid
 
     def add(self, user_id, port, password, method, plugin, plugin_opts):
         msg = dict(
@@ -88,6 +98,8 @@ class SSManager:
         # to bytes
         req = req.encode('utf-8')
         self.cli.send(req)
+        if self.enable_sniproxy:
+            self.sniproxy.add(int(port))  # port should be int here
         pipeline = self.redis.pipeline()
         pipeline.hset(self._get_key(['user', str(port)]), 'cursor', 0)
         pipeline.hset(self._get_key(['user', str(port)]), 'user_id', user_id)
@@ -106,12 +118,15 @@ class SSManager:
         req = 'remove: {msg}'.format(msg=json.dumps(msg))
         req = req.encode('utf-8')
         self.cli.send(req)
+        if self.enable_sniproxy:
+            self.sniproxy.remove(port)
         return self.cli.recv(1506) == b'ok'
+
+    def reset_inactive_port(self):
+        ports, _ = self.state
+        for port, info in ports.items():
+            if info.get('cursor') == info.get('throughput'):
+                self.remove(port)
 
     def set_cursor(self, port, data):
         self.redis.hset(self._get_key(['user', str(port)]), 'cursor', data)
-
-    def __del__(self):
-        bind_address = self.config.get('bind_address')
-        if os.path.exists(bind_address):
-            os.remove(bind_address)
