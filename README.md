@@ -38,6 +38,11 @@ services:
     depends_on:
       - 'redis'
       - 'ss-manager'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '200k'
+        max-file: 10
     environment:
       - 'manager_host=127.0.0.1'
       - 'redis_host=127.0.0.1'
