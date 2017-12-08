@@ -11,7 +11,11 @@ test_time: 10
 diff_time: 10
 post_load_period: 60
 upload_throughput_period: 600
+online_count_dif_byte_threshold: 1024
+
 memory_watcher_period: 600
+reset_memory_threshold: 15
+
 enable_ip_watcher: false
 ip_watcher_period: 30
 upload_connection_ip_period: 3600
@@ -27,4 +31,4 @@ manager_port: 8839
 
 fast_open: true
 mode: 'tcp_and_udp'
-reset_memory_threshold: 15
+

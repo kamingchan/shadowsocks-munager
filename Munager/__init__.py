@@ -139,9 +139,9 @@ class Munager:
 
                 if user.available and port in state:
                     if user.passwd != state.get(port).get('password') or \
-                                    user.method != state.get(port).get('method') or \
-                                    user.plugin != state.get(port).get('plugin') or \
-                                    user.plugin_opts != state.get(port).get('plugin_opts'):
+                            user.method != state.get(port).get('method') or \
+                            user.plugin != state.get(port).get('plugin') or \
+                            user.plugin_opts != state.get(port).get('plugin_opts'):
                         if self.ss_manager.remove(user.port) and self.ss_manager.add(
                                 user_id=user_id,
                                 port=user.port,
@@ -173,8 +173,9 @@ class Munager:
                         d=throughput,
                     ))
                 elif throughput > cursor:
-                    online_amount += 1
-                    dif = throughput - cursor
+                    dif = throughput - cursor  # in byte
+                    if dif > self.config.get('online_count_dif_byte_threshold', 1024):
+                        online_amount += 1
                     post_data.append(dict(
                         id=user_id,
                         u=0,
