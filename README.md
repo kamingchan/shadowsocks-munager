@@ -42,7 +42,7 @@ services:
       driver: 'json-file'
       options:
         max-size: '200k'
-        max-file: 10
+        max-file: '10'
     environment:
       - 'manager_host=127.0.0.1'
       - 'redis_host=127.0.0.1'
