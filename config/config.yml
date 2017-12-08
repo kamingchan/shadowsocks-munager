@@ -12,6 +12,7 @@ diff_time: 10
 post_load_period: 60
 upload_throughput_period: 600
 memory_watcher_period: 600
+enable_ip_watcher: false
 ip_watcher_period: 30
 upload_connection_ip_period: 3600
 

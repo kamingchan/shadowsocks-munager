@@ -273,16 +273,17 @@ class Munager:
             callback_time=self._to_msecond(self.config.get('memory_watcher_period', 600)),
             io_loop=self.ioloop,
         ).start()
-        PeriodicCallback(
-            callback=self.ip_watcher,
-            callback_time=self._to_msecond(self.config.get('ip_watcher_period', 30)),
-            io_loop=self.ioloop,
-        ).start()
-        PeriodicCallback(
-            callback=self.upload_connection_ip,
-            callback_time=self._to_msecond(self.config.get('upload_connection_ip_period', 3600)),
-            io_loop=self.ioloop,
-        ).start()
+        if self.config.get('enable_ip_watcher', False):
+            PeriodicCallback(
+                callback=self.ip_watcher,
+                callback_time=self._to_msecond(self.config.get('ip_watcher_period', 30)),
+                io_loop=self.ioloop,
+            ).start()
+            PeriodicCallback(
+                callback=self.upload_connection_ip,
+                callback_time=self._to_msecond(self.config.get('upload_connection_ip_period', 3600)),
+                io_loop=self.ioloop,
+            ).start()
         try:
             # Init task
             self.ioloop.run_sync(self.update_ss_manager)
